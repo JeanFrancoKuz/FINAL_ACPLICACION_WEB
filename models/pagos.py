@@ -6,22 +6,27 @@ from typing import Optional, List
 from extensions import db
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .clientes import Cliente
+    from .fotos import Foto
 
 # ------------------------------------------------------------------
 # Enumeraciones
 # ------------------------------------------------------------------
 class EstadoPago(Enum):
-    PENDIENTE = "pendiente"
-    VALIDADO = "validado"
-    RECHAZADO = "rechazado"
+    PENDIENTE = "PENDIENTE"
+    VALIDADO = "VALIDADO"
+    RECHAZADO = "RECHAZADO"
 
 
 class TipoPago(Enum):
-    MENSUALIDAD = "mensualidad"
-    INSCRIPCION = "inscripcion"
-    EFECTIVO = "efectivo"
-    TRANSFERENCIA = "transferencia"
-    TARJETA = "tarjeta"
+    MENSUALIDAD = "MENSUALIDAD"
+    INSCRIPCION = "INSCRIPCION"
+    EFECTIVO = "EFECTIVO"
+    TRANSFERENCIA = "TRANFERENCIA/PAGO_MOVIL"
+    TARJETA = "TARJETA"
 
 
 # ------------------------------------------------------------------
