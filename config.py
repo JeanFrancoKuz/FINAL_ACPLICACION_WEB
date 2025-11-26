@@ -8,3 +8,6 @@ class Config:
         f"sqlite:///{os.path.join(os.path.dirname(__file__), 'instance', 'database.db')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
+UPLOAD_FOLDER = "static/uploads"

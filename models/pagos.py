@@ -1,5 +1,3 @@
-# Aplicacion_web/models/pagos.py
-
 from datetime import datetime
 from enum import Enum
 from typing import Optional, List
@@ -25,7 +23,7 @@ class TipoPago(Enum):
     MENSUALIDAD = "MENSUALIDAD"
     INSCRIPCION = "INSCRIPCION"
     EFECTIVO = "EFECTIVO"
-    TRANSFERENCIA = "TRANFERENCIA/PAGO_MOVIL"
+    TRANSFERENCIA = "TRANSFERENCIA/PAGO_MOVIL"
     TARJETA = "TARJETA"
 
 

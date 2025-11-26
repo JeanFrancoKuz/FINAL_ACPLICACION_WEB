@@ -1,5 +1,3 @@
-# Aplicacion_web/models/clientes.py
-
 """
 Modelo Cliente – 1‑a‑1 con Usuario y relaciones a pagos, asistencias,
 progreso y fotos.
@@ -48,6 +46,7 @@ class Cliente(db.Model):
     cedula: str = db.Column(db.String(20), unique=True, nullable=False)
     correo: str = db.Column(db.String(120), unique=True, nullable=True)
     telefono: str = db.Column(db.String(20), nullable=True)
+    foto_perfil = db.Column(db.String(255), nullable=True)
 
     # ---------- Estado de membresía ----------
     estado_membresia = db.Column(
@@ -139,7 +138,7 @@ class Cliente(db.Model):
         if self.membresia_vencimiento is None:
             return None
         delta = self.membresia_vencimiento - datetime.utcnow()
-        return max(delta.days, -delta.days)  # >0 → días faltantes, <0 → días vencidos
+        return delta.days  # >0 → días faltantes, <0 → días vencidos
 
     def membresia_activa(self) -> bool:
         """True cuando la membresía está marcada como ACTIVO y no ha vencido."""
@@ -150,6 +149,7 @@ class Cliente(db.Model):
         )
 
     # ───────────────────────── SERIALIZACIÓN ───────────────────────── #
+    
     def to_dict(self, include_relations: bool = False) -> Dict:
         """Convierte el objeto a `dict` JSON‑friendly."""
         data: Dict = {
@@ -158,6 +158,7 @@ class Cliente(db.Model):
             "cedula": self.cedula,
             "correo": self.correo,
             "telefono": self.telefono,
+            "foto_perfil": self.foto_perfil, 
             "estado_membresia": self.estado_membresia.value,
             "fecha_ingreso": (
                 self.fecha_ingreso.isoformat() if self.fecha_ingreso else None
