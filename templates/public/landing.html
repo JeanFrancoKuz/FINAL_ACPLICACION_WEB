@@ -5,19 +5,16 @@
 {% block content %}
 
 <!-- HERO PRINCIPAL -->
-<section class="position-relative" style="height: 80vh; background: url({{ url_for('static', filename='img/landing/hero.jpg') }}) center / cover no-repeat;">
-    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.6);"></div>
-
-    <div class="position-absolute top-50 start-50 translate-middle text-center text-white px-3">
+<section class="hero">
+    <div class="hero-content">
         <h1 class="display-4 fw-bold mb-3">Entrena. Mejora. Supera tus límites.</h1>
         <p class="lead mb-4">Únete al centro deportivo más completo y lleva tu cuerpo al siguiente nivel.</p>
         <a href="{{ url_for('auth.login') }}" class="btn btn-danger btn-lg px-5 py-2 fw-semibold shadow">Ingresar</a>
     </div>
-    
 </section>
 
 <!-- SECCIÓN SERVICIOS -->
-<section id="servicios" class="py-5 bg-light">
+<section id="servicios">
     <div class="container">
         <h2 class="text-center fw-bold mb-4">Nuestros Servicios</h2>
         <div class="row g-4 mt-3">
@@ -39,19 +36,18 @@
             </div>
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold">Clases Grupales</h5>
-                    <p>Entrenamientos dinámicos para mantenerte motivado.</p>
-                </div>
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold">Clases Grupales</h5>
+                        <p>Entrenamientos dinámicos para mantenerte motivado.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-
 <!-- SECCIÓN CONTACTO -->
-<section id="contacto" class="py-5 bg-dark text-white">
+<section id="contacto">
     <div class="container">
         <h2 class="text-center fw-bold mb-4">Contáctanos</h2>
         <div class="row justify-content-center">

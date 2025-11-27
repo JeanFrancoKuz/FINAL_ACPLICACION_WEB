@@ -56,13 +56,28 @@ def dashboard_cliente():
 @roles_required("ADMIN")
 def lista_clientes():
     q = request.args.get("q", "").strip()
+    estado = request.args.get("estado", "").strip()
+
+    query = Cliente.query
+
     if q:
-        clientes = Cliente.query.filter(
-            (Cliente.nombre.ilike(f"%{q}%")) | (Cliente.cedula.ilike(f"%{q}%"))
-        ).all()
-    else:
-        clientes = Cliente.query.all()
-    return render_template("admin/lista_clientes.html", clientes=clientes)
+        query = query.filter(
+            (Cliente.nombre.ilike(f"%{q}%")) |
+            (Cliente.cedula.ilike(f"%{q}%")) |
+            (Cliente.correo.ilike(f"%{q}%"))
+        )
+
+    if estado:
+        # Filtra solo si se envía un estado válido
+        try:
+            query = query.filter_by(estado_membresia=EstadoMembresia[estado])
+        except KeyError:
+            pass
+
+    clientes = query.all()
+    return render_template("admin/lista_clientes_admin.html", clientes=clientes)
+
+
 
 # ---------------------------
 # Crear cliente

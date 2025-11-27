@@ -1,0 +1,20 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Detalle Cliente - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Detalle del Cliente</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">{{ cliente.nombre }}</h5>
+        <p class="mb-1"><strong>Correo:</strong> {{ cliente.correo }}</p>
+        <p class="mb-1"><strong>Cédula:</strong> {{ cliente.cedula }}</p>
+        <p class="mb-1"><strong>Rol:</strong> {{ cliente.rol.nombre }}</p>
+    </div>
+</div>
+
+<div class="text-end">
+    <a href="{{ url_for('admin.clientes') }}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}

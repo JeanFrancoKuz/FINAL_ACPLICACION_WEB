@@ -1,0 +1,45 @@
+/* HERO PRINCIPAL */
+.hero {
+    height: 80vh;
+    position: relative;
+    background-image: url('../img/landing/hero.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    padding: 0 1rem;
+}
+
+/* SECCIÓN SERVICIOS */
+#servicios {
+    padding: 3rem 0;
+    background-color: #f8f9fa; /* bg-light */
+}
+
+/* SECCIÓN CONTACTO */
+#contacto {
+    padding: 3rem 0;
+    background-color: #212529; /* bg-dark */
+    color: white;
+}
+
+#contacto .form-label {
+    color: white;
+}

@@ -1,0 +1,49 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Dashboard - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Panel Administrativo</h1>
+
+<div class="row g-4">
+    <!-- Card Clientes -->
+    <div class="col-md-3">
+        <div class="card text-white bg-primary shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Clientes</h5>
+                <p class="card-text fs-2">{{ total_clientes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Pagos -->
+    <div class="col-md-3">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Pagos</h5>
+                <p class="card-text fs-2">{{ total_pagos }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Asistencias -->
+    <div class="col-md-3">
+        <div class="card text-white bg-warning shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Asistencias</h5>
+                <p class="card-text fs-2">{{ total_asistencias }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Reportes -->
+    <div class="col-md-3">
+        <div class="card text-white bg-info shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Reportes</h5>
+                <a href="{{ url_for('reportes.panel') }}" class="btn btn-light btn-sm mt-2">Ir a Reportes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

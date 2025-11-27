@@ -34,7 +34,7 @@ def lista_asistencias():
     )
 
 # ---------------------------------
-# 2️Registrar asistencia (cliente)
+#Registrar asistencia (cliente)
 # ---------------------------------
 @asistencia_bp.route("/registrar", methods=["POST"])
 @login_required
@@ -72,3 +72,21 @@ def registrar_asistencia():
         db.session.rollback()
         flash(f"Error al registrar la asistencia: {str(e)}", "danger")
     return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
+
+# ---------------------------------
+# Borrar asistencia (admin)
+# ---------------------------------
+
+@asistencia_bp.route("/eliminar/<int:id>", methods=["POST"])
+@login_required
+@roles_required("ADMIN")
+def eliminar_asistencia(id):
+    asistencia = Asistencia.query.get_or_404(id)
+    try:
+        db.session.delete(asistencia)
+        db.session.commit()
+        flash("Asistencia eliminada correctamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"No se pudo eliminar la asistencia: {str(e)}", "danger")
+    return redirect(url_for("asistencia.lista_asistencias"))

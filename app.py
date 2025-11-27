@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 from extensions import db, login_manager
 from models.usuarios import Usuario
@@ -37,7 +37,7 @@ def create_app():
 
     @app.route("/")
     def index():
-        return "Aplicación Web Universidad - Proyecto Local"
+        return render_template('public/landing.html')
 
     # --- Inicialización de BD y roles ---
     with app.app_context():

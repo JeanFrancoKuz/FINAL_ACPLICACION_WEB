@@ -1,5 +1,5 @@
 from datetime import datetime, date, time, timedelta, timezone
-from flask import Blueprint, render_template, flash
+from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required
 from sqlalchemy import func
 
@@ -61,3 +61,38 @@ def dashboard():
         pagos_pendientes=pagos_pendientes,
         asistencias_hoy=asistencias_hoy
     )
+
+# ---------------------------
+# enviar mensaje
+# ---------------------------
+@admin_bp.route("/enviar_mensaje/<int:cliente_id>")
+@login_required
+@roles_required("ADMIN")
+def enviar_mensaje(cliente_id):
+    cliente = Cliente.query.get_or_404(cliente_id)
+
+    if cliente.estado_membresia != EstadoMembresia.VENCIDO:
+        flash("Solo se puede enviar mensaje a clientes con membresía vencida.", "warning")
+        return redirect(url_for("cliente.lista_clientes"))
+
+    # Construir el mensaje
+    mensaje = f"""
+Hola {cliente.nombre},
+
+Notamos que tu membresía en HITO ALL SPORT ha vencido el {cliente.membresia_vencimiento.strftime('%d-%m-%Y')}.
+Te invitamos a renovarla para continuar con tus entrenamientos y beneficios.
+
+Para renovar tu membresía, por favor contáctanos al {cliente.telefono or 'correo: ' + cliente.correo} o ingresa a tu perfil y realiza el pago correspondiente.
+
+¡Te esperamos!
+HITO ALL SPORT
+"""
+
+    # Simulación de envío
+    if cliente.telefono:
+        print(f"[DEBUG] Mensaje enviado a {cliente.telefono}:\n{mensaje}")
+    else:
+        print(f"[DEBUG] Mensaje enviado a {cliente.correo}:\n{mensaje}")
+
+    flash(f"Mensaje de recordatorio enviado a {cliente.nombre}.", "success")
+    return redirect(url_for("cliente.lista_clientes"))

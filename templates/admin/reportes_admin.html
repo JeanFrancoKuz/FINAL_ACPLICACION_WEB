@@ -1,0 +1,56 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Reportes - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Reporte General</h1>
+
+<div class="mb-3">
+    <a href="{{ url_for('reportes.descargar_general_pdf') }}" class="btn btn-primary">
+        <i class="bi bi-download"></i> Descargar PDF
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Clientes -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Clientes</h5>
+                <p>Total: {{ total_clientes }}</p>
+                <p>Activos: {{ activos }}</p>
+                <p>Vencidos: {{ vencidos }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagos -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Pagos</h5>
+                <p>Total: {{ total_pagos }}</p>
+                <p>Validados: {{ pagos_validados }}</p>
+                <p>Rechazados: {{ pagos_rechazados }}</p>
+                <p>Pendientes: {{ pagos_pendientes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asistencias -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Asistencias</h5>
+                <p>Este mes: {{ asistencias_mes }}</p>
+                <ul>
+                    {% for dia, total in asistencias_por_dia.items() %}
+                    <li>{{ dia }}: {{ total }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
