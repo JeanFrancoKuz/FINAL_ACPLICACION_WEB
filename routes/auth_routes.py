@@ -5,7 +5,12 @@ from werkzeug.security import check_password_hash
 from models.usuarios import Usuario
 from extensions import db
 
-auth_bp = Blueprint("auth", __name__)
+auth_bp = Blueprint(
+    "auth",
+    __name__,
+    template_folder="../templates/auth"
+)
+
 
 # ---------- Login ----------
 @auth_bp.route("/login", methods=["GET", "POST"])
