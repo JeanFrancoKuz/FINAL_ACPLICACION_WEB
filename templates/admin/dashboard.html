@@ -1,49 +1,51 @@
 {% extends "base/layout_admin.html" %}
-
-{% block title %}Dashboard - Admin{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Panel Administrativo</h1>
+
+<h2 class="fw-bold mb-4">Dashboard Administrativo</h2>
 
 <div class="row g-4">
-    <!-- Card Clientes -->
     <div class="col-md-3">
-        <div class="card text-white bg-primary shadow-sm">
+        <div class="card shadow-sm border-0 text-white bg-primary">
             <div class="card-body">
-                <h5 class="card-title">Clientes</h5>
-                <p class="card-text fs-2">{{ total_clientes }}</p>
+                <h5 class="card-title">Clientes Activos</h5>
+                <h2>{{ clientes_activos }}</h2>
             </div>
         </div>
     </div>
-
-    <!-- Card Pagos -->
     <div class="col-md-3">
-        <div class="card text-white bg-success shadow-sm">
+        <div class="card shadow-sm border-0 text-white bg-secondary">
             <div class="card-body">
-                <h5 class="card-title">Pagos</h5>
-                <p class="card-text fs-2">{{ total_pagos }}</p>
+                <h5 class="card-title">Clientes Vencidos</h5>
+                <h2>{{ clientes_vencidos }}</h2>
             </div>
         </div>
     </div>
-
-    <!-- Card Asistencias -->
     <div class="col-md-3">
-        <div class="card text-white bg-warning shadow-sm">
+        <div class="card shadow-sm border-0 text-white bg-success">
             <div class="card-body">
-                <h5 class="card-title">Asistencias</h5>
-                <p class="card-text fs-2">{{ total_asistencias }}</p>
+                <h5 class="card-title">Pagos Registrados</h5>
+                <h2>{{ pagos_registrados }}</h2>
             </div>
         </div>
     </div>
-
-    <!-- Card Reportes -->
     <div class="col-md-3">
-        <div class="card text-white bg-info shadow-sm">
+        <div class="card shadow-sm border-0 text-white bg-warning">
             <div class="card-body">
-                <h5 class="card-title">Reportes</h5>
-                <a href="{{ url_for('reportes.panel') }}" class="btn btn-light btn-sm mt-2">Ir a Reportes</a>
+                <h5 class="card-title">Pagos Pendientes</h5>
+                <h2>{{ pagos_pendientes }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-4">
+        <div class="card shadow-sm border-0 text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Asistencias Hoy</h5>
+                <h2>{{ asistencias_hoy }}</h2>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

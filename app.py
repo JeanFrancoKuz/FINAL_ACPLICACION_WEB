@@ -31,9 +31,20 @@ def create_app():
         return Usuario.query.get(int(user_id))
 
     # Registra blueprints
-    for bp in (admin_bp, auth_bp, cliente_bp, pago_bp,
-            asistencia_bp, foto_bp, progreso_bp, reportes_bp):
-        app.register_blueprint(bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(cliente_bp)
+    app.register_blueprint(pago_bp)
+    app.register_blueprint(asistencia_bp)
+    app.register_blueprint(foto_bp)
+    app.register_blueprint(progreso_bp)
+    app.register_blueprint(reportes_bp)
+
+    # --- MOSTRAR TODAS LAS RUTAS ---
+    print("\n=== RUTAS REGISTRADAS EN FLASK ===")
+    for rule in app.url_map.iter_rules():
+        print(rule)
+    print("==================================\n")
 
     @app.route("/")
     def index():
