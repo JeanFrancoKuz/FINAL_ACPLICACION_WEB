@@ -5,46 +5,27 @@ from models.usuarios import Usuario
 from extensions import db
 
 class Rol(db.Model):
-    """
-    Modelo de roles de la aplicación.
-    La relación `usuarios` es bidireccional con Usuario usando Mapped[List["Usuario"]].
-    """
-
     __tablename__ = "roles"
-    __table_args__ = (
-        db.UniqueConstraint("nombre", name="uq_rol_nombre"),
-    )
+    __table_args__ = (db.UniqueConstraint("nombre", name="uq_rol_nombre"),)
 
-    # --------------------
-    # Columnas
-    # --------------------
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(db.String(50), nullable=False, unique=True)
+    descripcion: Mapped[str] = mapped_column(db.String(200), nullable=True)  # opcional
 
-    # --------------------
-    # Relación bidireccional con Usuario
-    # --------------------
     usuarios: Mapped[List["Usuario"]] = relationship(
-        "Usuario",
-        back_populates="rol",
-        cascade="all, delete-orphan",
-        lazy="select",
+        "Usuario", back_populates="rol",
+        cascade="all, delete-orphan", lazy="select"
     )
 
-    # --------------------
-    # Validaciones (run-time)
-    # --------------------
     @validates("nombre")
-    def _validate_nombre(self, key: str, value: str) -> str:
-        """Evita nombres vacíos o demasiado largos."""
+    def validar(self, key, value):
         if not value or not value.strip():
             raise ValueError("El nombre del rol no puede estar vacío.")
-        if len(value) > 50:
-            raise ValueError("El nombre del rol no puede superar los 50 caracteres.")
         return value.strip()
 
-    # --------------------
-    # Representación de depuración
-    # --------------------
-    def __repr__(self) -> str:
-        return f"<Rol {self.id}: {self.nombre}>"
+    def es(self, nombre: str) -> bool:
+        """Permite validar acceso fácilmente"""
+        return self.nombre.upper() == nombre.upper()
+
+    def __repr__(self):
+        return f"<Rol {self.id} - {self.nombre}>"

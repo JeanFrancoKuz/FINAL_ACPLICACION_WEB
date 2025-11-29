@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold text-uppercase" href="{{ url_for('cliente.dashboard_cliente') }}">
+            🏋 HITO Cliente
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuCliente">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="menuCliente">
+            <ul class="navbar-nav ms-auto gap-lg-3">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('cliente.dashboard_cliente') }}">📊 Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
+                        👤 Mi Perfil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('pago.registrar_pago', cliente_id=current_user.cliente.id) }}">
+                        💰 Registrar Pago
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('progreso.historial_progreso') }}">
+                        📈 Mi Progreso
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form action="{{ url_for('auth.logout') }}" method="POST">
+                        <button class="btn btn-danger btn-sm">Salir</button>
+                    </form>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,15 +1,47 @@
 <!-- Footer Público - HITO ALL SPORT -->
-<footer class="bg-dark text-white py-4 mt-5">
+<footer class="footer-public bg-dark text-white mt-5 pt-4 pb-3">
     <div class="container text-center">
-        <h5 class="fw-bold">HITO ALL SPORT</h5>
-        <p class="mb-1">Centro de entrenamiento y bienestar físico</p>
-        <div class="mt-3">
-            <a href="#" class="text-white mx-2 text-decoration-none">Términos y condiciones</a>
-                <span class="text-secondary">|</span>
-            <a href="#" class="text-white mx-2 text-decoration-none">Política de privacidad</a>
-        </div>
-        <div class="mt-3">
-            <small class="text-secondary">&copy; {{ current_year }} HITO ALL SPORT. Todos los derechos reservados.</small>
-        </div>
+
+        <!-- Marca -->
+        <h5 class="fw-bold mb-1">HITO ALL SPORT</h5>
+        <p class="text-light fst-italic">Centro de entrenamiento y bienestar físico.</p>
+
+        <!-- Navegación legal -->
+        <nav class="mt-3">
+            <a href="#" class="footer-link">Términos y condiciones</a>
+            <span class="mx-1 text-secondary">•</span>
+            <a href="#" class="footer-link">Política de privacidad</a>
+        </nav>
+
+        <hr class="border-secondary" style="width:60%; margin:auto; opacity:0.4;">
+
+        <!-- Derechos -->
+        <small class="text-secondary d-block mt-3">
+            &copy; <span id="year"></span> HITO ALL SPORT — Todos los derechos reservados.
+        </small>
+
     </div>
 </footer>
+
+<!-- Script para año automático -->
+<script>
+    document.getElementById("year").innerText = new Date().getFullYear();
+</script>
+
+<style>
+    .footer-link{
+        color:white;
+        text-decoration:none;
+        transition:0.3s;
+    }
+    .footer-link:hover{
+        color:#ffc107;
+        text-shadow:0 0 8px rgba(255,193,7,0.6);
+    }
+    footer hr{
+        transition:0.3s;
+    }
+    footer:hover hr{
+        width:80%;
+    }
+</style>

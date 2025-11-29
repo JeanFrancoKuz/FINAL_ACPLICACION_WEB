@@ -1,79 +1,108 @@
 """
-Módulo: asistencias.py
-----------------------
-Este archivo define el modelo `Asistencia`, que registra la asistencia de un
-cliente a una actividad o sesión.
+Modelo: Asistencia
+------------------
+Registro de acceso del cliente al gimnasio.
 
-Características principales:
-- Relación obligatoria con `Cliente` (cada asistencia pertenece a un cliente).
-- Restricción de unicidad: evita duplicar asistencias para el mismo cliente en
-la misma fecha.
-- Validaciones de integridad para `fecha` y `cliente_id`.
-- Serialización a `dict` para exportar datos en formato JSON‑friendly.
+✔ Evita asistencia duplicada en el mismo día
+✔ Serialización lista para API/Front
+✔ Relación directa con Cliente
+✔ Utilidades para reportes mensuales
 """
-from datetime import datetime
+
+from datetime import datetime, date
 from typing import Dict
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, Mapped, mapped_column, relationship
+from sqlalchemy import func
 from extensions import db
 
 
 class Asistencia(db.Model):
     __tablename__ = "asistencias"
 
-    # ------------- ID -------------
-    id: int = db.Column(db.Integer, primary_key=True)
-
-    # ------------- Fecha -------------
-    fecha: datetime = db.Column(
-        db.DateTime(timezone=True),    
+    # ------------------- Datos Base -------------------
+    id: Mapped[int] = mapped_column(primary_key=True)
+    fecha: Mapped[datetime] = mapped_column(
+        db.DateTime(timezone=True),
         default=db.func.now(),
         nullable=False,
-        index=True,
+        index=True
     )
 
-    # ------------- Cliente -------------
-    cliente_id: int = db.Column(
-        db.Integer,
-        db.ForeignKey("clientes.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
+    # ------------------- Relación Cliente -------------------
+    cliente_id: Mapped[int] = mapped_column(
+        db.Integer, db.ForeignKey("clientes.id", ondelete="CASCADE"),
+        nullable=False, index=True
     )
-    cliente = db.relationship(
-        "Cliente",
-        back_populates="asistencias",
-        lazy="select",
-    )
+    cliente = relationship("Cliente", back_populates="asistencias", lazy="select")
 
-    # ------------- Restricciones de integridad -------------
+    # ------------------- Restricción Anti-Duplicado -------------------
     __table_args__ = (
         db.UniqueConstraint("cliente_id", "fecha", name="uq_cliente_fecha"),
     )
 
-    # ----------------- Validaciones ----------------- #
+
+    # ---------------- VALIDACIONES ---------------- #
     @validates("fecha")
-    def _validate_fecha(self, key: str, value: datetime) -> datetime:
+    def validar_fecha(self, _, value):
         if value is None:
-            raise ValueError("fecha no puede ser nula.")
+            raise ValueError("La fecha de asistencia no puede ser nula.")
         return value
 
     @validates("cliente_id")
-    def _validate_cliente_id(self, key: str, value: int) -> int:
-        if value is None:
-            raise ValueError("cliente_id no puede ser nulo.")
+    def validar_cliente(self, _, value):
+        if not value:
+            raise ValueError("cliente_id es obligatorio.")
         return value
 
-    # ----------------- Serialización ----------------- #
-    def to_dict(self, include_relations: bool = False) -> Dict:
+
+    # ---------------- MÉTODOS DE NEGOCIO ---------------- #
+    @classmethod
+    def registrar(cls, cliente_id:int) -> "Asistencia":
+        """
+        Crea asistencia si aún no existe en el día.
+        Evita errores por duplicados sin romper la app.
+        """
+        hoy = date.today()
+
+        existente = cls.query.filter(
+            func.date(cls.fecha) == hoy,
+            cls.cliente_id == cliente_id
+        ).first()
+
+        if existente:
+            return existente  # No genera error, devuelve la existente
+
+        nueva = cls(cliente_id=cliente_id)
+        db.session.add(nueva)
+        db.session.commit()
+        return nueva
+
+
+    @classmethod
+    def asistencias_del_mes(cls, cliente_id:int, mes:int, anio:int) -> int:
+        """Devuelve el total de asistencias en un mes específico."""
+        return cls.query.filter(
+            cls.cliente_id == cliente_id,
+            func.extract('month', cls.fecha) == mes,
+            func.extract('year', cls.fecha) == anio
+        ).count()
+
+
+    # ---------------- SERIALIZACIÓN ---------------- #
+    def to_dict(self, include_cliente=False) -> Dict:
         data = {
             "id": self.id,
-            "fecha": self.fecha.isoformat() if self.fecha else None,
-            "cliente_id": self.cliente_id,
+            "fecha": self.fecha.isoformat(),
+            "cliente_id": self.cliente_id
         }
-        if include_relations:
-            data["cliente"] = self.cliente.id if self.cliente else None
+        if include_cliente and self.cliente:
+            data["cliente"] = {
+                "id": self.cliente.id,
+                "nombre": self.cliente.nombre
+            }
         return data
 
-    # ----------------- Representación ----------------- #
-    def __repr__(self) -> str:
-        fecha = self.fecha.strftime("%d/%m/%Y") if self.fecha else "N/A"
-        return f"<Asistencia {self.id} cl={self.cliente_id} f={fecha}>"
+    # ---------------- REPRESENTACIÓN ---------------- #
+    def __repr__(self):
+        fecha = self.fecha.strftime("%d/%m/%Y %H:%M")
+        return f"<Asistencia id={self.id} Cliente={self.cliente_id} | {fecha}>"

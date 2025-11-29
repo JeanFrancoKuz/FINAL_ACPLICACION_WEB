@@ -1,32 +1,74 @@
 <!-- Navbar Pública - HITO ALL SPORT -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm">
-    <div class="container">
-        <!-- Logo -->
-        <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="HITO ALL SPORT" height="45" class="me-2">
-            <span class="fw-bold">HITO ALL SPORT</span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm fixed-top">
+    <div class="container d-flex align-items-center">
+
+        <!-- LOGOTIPO -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="HITO ALL SPORT" height="42">
+            <span class="fw-bold fs-5 tracking-wide">HITO ALL SPORT</span>
         </a>
-        <!-- Botón responsive -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublico" aria-controls="navbarPublico" aria-expanded="false" aria-label="Menú de navegación">
+
+        <!-- Toggle Responsive -->
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublico">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <!-- Items del menú -->
+
+        <!-- Menú -->
         <div class="collapse navbar-collapse" id="navbarPublico">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#servicios">Servicios</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#contacto">Contacto</a>
-                </li>
-                <!-- Botón Login -->
-                <li class="nav-item ms-lg-3">
-                    <a class="btn btn-danger px-4 fw-semibold" href="{{ url_for('auth.login') }}">Ingresar</a>
-                </li>
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+
+                <li class="nav-item"><a class="nav-link hover-underline" href="/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link hover-underline" href="#servicios">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link hover-underline" href="#contacto">Contacto</a></li>
+
+                <!-- MOSTRAR BOTÓN LOGIN solo si NO está autenticado -->
+                {% if not current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="btn btn-danger px-4 fw-semibold shadow-sm" href="{{ url_for('auth.login') }}">
+                            Ingresar
+                        </a>
+                    </li>
+
+                {% else %}
+                    <!-- Si está logueado redirige a su dashboard según su rol -->
+                    <li class="nav-item">
+                        <a class="btn btn-warning px-3 fw-semibold shadow-sm" 
+                           href="{{ url_for('cliente.dashboard_cliente') if current_user.rol.nombre=='CLIENTE' else url_for('admin.dashboard') }}">
+                            Panel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
+                            <button class="btn btn-outline-light fw-semibold">Salir</button>
+                        </form>
+                    </li>
+                {% endif %}
+
             </ul>
         </div>
     </div>
 </nav>
+
+<!-- Estilos personalizados -->
+<style>
+    nav.navbar { backdrop-filter: blur(6px); }
+
+    /* Subrayado animado en hover */
+    .hover-underline {
+        position: relative;
+        transition: color .2s;
+    }
+    .hover-underline::after {
+        content:"";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #dc3545;
+        transition: .3s;
+    }
+    .hover-underline:hover::after {
+        width: 100%;
+    }
+</style>

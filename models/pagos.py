@@ -1,18 +1,15 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from extensions import db
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 if TYPE_CHECKING:
     from .clientes import Cliente
     from .fotos import Foto
 
-# ------------------------------------------------------------------
-# Enumeraciones
-# ------------------------------------------------------------------
+
+# ───────────────────────── ENUMS ───────────────────────── #
 class EstadoPago(Enum):
     PENDIENTE = "PENDIENTE"
     VALIDADO = "VALIDADO"
@@ -27,78 +24,63 @@ class TipoPago(Enum):
     TARJETA = "TARJETA"
 
 
-# ------------------------------------------------------------------
-# Modelo Pago
-# ------------------------------------------------------------------
+# ───────────────────────── MODELO ───────────────────────── #
 class Pago(db.Model):
-    """Registro de un pago (mensualidad, inscripción, etc.)."""
     __tablename__ = "pagos"
 
-    # ------------- Columnas -------------
     id: Mapped[int] = mapped_column(primary_key=True)
     cliente_id: Mapped[int] = mapped_column(
-        db.ForeignKey("clientes.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
+        db.ForeignKey("clientes.id", ondelete="CASCADE"), nullable=False, index=True
     )
     monto: Mapped[float] = mapped_column(nullable=False)
     tipo: Mapped[TipoPago] = mapped_column(
-        db.Enum(TipoPago, name="tipo_pago_enum", native_enum=False),
-        nullable=False,
+        db.Enum(TipoPago, name="tipo_pago_enum"), nullable=False
     )
     fecha_pago: Mapped[datetime] = mapped_column(
-        db.DateTime(timezone=True),
-        default=db.func.now(),
-        index=True,
-        nullable=False,
+        db.DateTime(timezone=True), default=db.func.now(), index=True
     )
     observacion: Mapped[Optional[str]] = mapped_column(db.String(255))
     estado: Mapped[EstadoPago] = mapped_column(
-        db.Enum(EstadoPago, name="estado_pago_enum", native_enum=False),
-        nullable=False,
+        db.Enum(EstadoPago, name="estado_pago_enum"),
         default=EstadoPago.PENDIENTE,
+        nullable=False,
         index=True,
     )
 
-    # ------------- Relaciones -------------
+    # Relaciones
     cliente: Mapped["Cliente"] = relationship("Cliente", back_populates="pagos")
     fotos: Mapped[List["Foto"]] = relationship(
-        "Foto",
-        back_populates="pago",
-        cascade="all, delete-orphan",
-        lazy="select",
+        "Foto", back_populates="pago", cascade="all, delete-orphan"
     )
 
-    # ------------------------------------------------------------------
-    # Métodos de negocio
-    # ------------------------------------------------------------------
-    def validar(self) -> None:
-        """Aprueba el pago."""
+    # ───────────────────────── VALIDACIONES ───────────────────────── #
+    @validates("monto")
+    def validar_monto(self, key, value):
+        if value <= 0:
+            raise ValueError("El monto del pago debe ser mayor a 0.")
+        return value
+
+    # ───────────────────────── BUSINESS LOGIC ───────────────────────── #
+    def validar(self):
+        """Aprueba el pago y activa/renueva membresía si corresponde."""
         self.estado = EstadoPago.VALIDADO
 
-    def rechazar(self) -> None:
+        # Auto-renovar membresía si es mensualidad
+        if self.tipo == TipoPago.MENSUALIDAD and self.cliente:
+            self.cliente.activar_membresia(30)
+
+    def rechazar(self):
         """Rechaza el pago."""
         self.estado = EstadoPago.RECHAZADO
 
-    # ------------------------------------------------------------------
-    # Validaciones adicionales
-    # ------------------------------------------------------------------
-    def validar_monto(self) -> None:
-        """Valida que el monto sea mayor a 0."""
-        if self.monto <= 0:
-            raise ValueError("El monto del pago debe ser mayor a 0.")
-
-    # ------------------------------------------------------------------
-    # Serialización auxiliar
-    # ------------------------------------------------------------------
+    # ───────────────────────── SERIALIZACIÓN ───────────────────────── #
     def to_dict(self, include_fotos: bool = False) -> dict:
-        """Convierte a dict (útil para JSON)."""
         data = {
             "id": self.id,
             "cliente_id": self.cliente_id,
             "monto": self.monto,
             "tipo": self.tipo.value,
-            "fecha_pago": self.fecha_pago.isoformat() if self.fecha_pago else None,
+            "fecha_pago": self.fecha_pago.isoformat(),
             "observacion": self.observacion,
             "estado": self.estado.value,
         }
@@ -106,11 +88,5 @@ class Pago(db.Model):
             data["fotos"] = [f.to_dict() for f in self.fotos]
         return data
 
-    # ------------------------------------------------------------------
-    # Representación legible
-    # ------------------------------------------------------------------
-    def __repr__(self) -> str:
-        return (
-            f"<Pago {self.id} | cliente={self.cliente_id} "
-            f"| {self.monto} | {self.estado.value}>"
-        )
+    def __repr__(self):
+        return f"<Pago {self.id} Cliente={self.cliente_id} {self.monto} {self.estado.value}>"

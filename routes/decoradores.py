@@ -2,33 +2,34 @@ from functools import wraps
 from flask import redirect, url_for, flash
 from flask_login import current_user
 
-# --------------------------------------------------------------------------- #
-# Role control decorator
-# --------------------------------------------------------------------------- #
+
+# ================================================================
+#   🔐 Decorador: Requiere rol específico
+# ================================================================
 def roles_required(*allowed_roles):
     """
-    Allow access only to authenticated users
-    who have one of the specified roles.
+    Permite acceso solo a usuarios autenticados con uno de los roles indicados.
 
-    Example:
+    Ejemplo:
         @roles_required("ADMIN", "CLIENTE")
-        def my_view():
+        def vista():
             ...
     """
+
     allowed_roles = {role.upper() for role in allowed_roles}
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+
+            # Usuario no logueado
             if not current_user.is_authenticated:
-                flash("You must log in to access.", "warning")
+                flash("Debes iniciar sesión.", "warning")
                 return redirect(url_for("auth.login"))
 
-            if (
-                current_user.rol is None
-                or current_user.rol.nombre.upper() not in allowed_roles
-            ):
-                flash("You do not have permission to access this section.", "danger")
+            # Usuario sin rol o rol no autorizado
+            if not current_user.rol or current_user.rol.nombre.upper() not in allowed_roles:
+                flash("No tienes permiso para acceder aquí.", "danger")
                 return redirect(url_for("index"))
 
             return func(*args, **kwargs)
@@ -38,20 +39,60 @@ def roles_required(*allowed_roles):
     return decorator
 
 
-# --------------------------------------------------------------------------- #
-# Active account decorator
-# --------------------------------------------------------------------------- #
+
+# ================================================================
+#   🔒 Decorador: Cuenta Activa (is_active=True)
+# ================================================================
 def active_account_required(func):
     """
-    Ensure that the account is active (is_active=True).
-    Assumes the user is already authenticated; if not,
-    redirects to the login screen.
+    Bloquea acceso a cuentas desactivadas o inactivas.
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_active:
-            flash("Your account is deactivated. Contact the administrator.", "danger")
+
+        if not current_user.is_authenticated:
+            flash("Primero inicia sesión.", "warning")
             return redirect(url_for("auth.login"))
+
+        if not current_user.is_active:
+            flash("Tu cuenta está desactivada. Contacta al administrador.", "danger")
+            return redirect(url_for("auth.login"))
+
         return func(*args, **kwargs)
 
     return wrapper
+
+
+
+# ================================================================
+#   🛡 Decorador combinado opcional
+# ================================================================
+def secured_route(*roles):
+    """
+    @secured_route("ADMIN")
+    @secured_route("CLIENTE","ADMIN")
+    -> Rol + Cuenta Activa
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+
+            if not current_user.is_authenticated:
+                flash("Debes iniciar sesión.", "warning")
+                return redirect(url_for("auth.login"))
+
+            if not current_user.is_active:
+                flash("Cuenta desactivada. Contacta al administrador.", "danger")
+                return redirect(url_for("auth.login"))
+
+            if roles and current_user.rol.nombre.upper() not in {r.upper() for r in roles}:
+                flash("Acceso denegado.", "danger")
+                return redirect(url_for("index"))
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

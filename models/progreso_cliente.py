@@ -1,89 +1,66 @@
-
 from datetime import datetime
 from typing import Dict, Optional
-
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, Mapped, mapped_column, relationship
 from extensions import db
 
-# ------------------------------------------------------------------
-# Modelo: Progreso de un cliente (peso, altura, etc.)
-# ------------------------------------------------------------------
-class ProgresoCliente(db.Model):
-    """Registro de estado físico de un cliente."""
 
+class ProgresoCliente(db.Model):
     __tablename__ = "progresos_cliente"
 
-    # ---------- Columnas ----------
-    id: int = db.Column(db.Integer, primary_key=True)
-    cliente_id: int = db.Column(
-        db.Integer,
-        db.ForeignKey("clientes.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
+    # ---------- Campos ----------
+    id: Mapped[int] = mapped_column(primary_key=True)
+    cliente_id: Mapped[int] = mapped_column(
+        db.Integer, db.ForeignKey("clientes.id", ondelete="CASCADE"), index=True
     )
-    fecha_registro: datetime = db.Column(
-        db.DateTime(timezone=True), default=db.func.now(), nullable=False, index=True
+    fecha_registro: Mapped[datetime] = mapped_column(
+        db.DateTime(timezone=True), default=db.func.now(), index=True
     )
-    peso: float = db.Column(db.Float, nullable=False)          # kg
-    altura: float = db.Column(db.Float, nullable=False)        # m
-    grasa_corporal: Optional[float] = db.Column(db.Float)     # %
-    masa_muscular: Optional[float] = db.Column(db.Float)     # %
+
+    peso: Mapped[float] = mapped_column(nullable=False)         # kg
+    altura: Mapped[float] = mapped_column(nullable=False)       # metros
+    grasa_corporal: Mapped[Optional[float]] = mapped_column(db.Float) # %
+    masa_muscular: Mapped[Optional[float]] = mapped_column(db.Float) # %
 
     # ---------- Relaciones ----------
-    cliente = db.relationship("Cliente", back_populates="progresos")
-
-    fotos = db.relationship(
-        "Foto",
-        back_populates="progreso",
-        cascade="all, delete-orphan",
-        lazy="select",
+    cliente = relationship("Cliente", back_populates="progresos")
+    fotos = relationship(
+        "Foto", back_populates="progreso", cascade="all, delete-orphan"
     )
 
-    # ------------------------------------------------------------------
-    # Validaciones automáticas (opcional)
-    # ------------------------------------------------------------------
+    # ---------- Validaciones ----------
     @validates("peso", "altura", "grasa_corporal", "masa_muscular")
-    def _validate_metrica(self, key: str, value: Optional[float]) -> Optional[float]:
-        """
-        - `peso` y `altura` deben > 0
-        - `grasa_corporal` y `masa_muscular` (si existen) entre 0 y 100
-        """
+    def validar_metricas(self, key, value):
         if key in ("peso", "altura"):
-            if value is None or value <= 0:
-                raise ValueError(f"{key} debe ser mayor a 0.")
-            return value
+            if not value or value <= 0:
+                raise ValueError(f"{key} debe ser mayor a 0")
+        else:
+            if value is not None and not 0 <= value <= 100:
+                raise ValueError(f"{key} debe estar entre 0 y 100")
+        return value
 
-        if value is not None:
-            if not 0 <= value <= 100:
-                raise ValueError(f"{key} debe estar entre 0 y 100.")
-        return value  # para `None`
+    # ---------- Cálculo automático ----------
+    def calcular_imc(self) -> Optional[float]:
+        """Retorna IMC/ BMI redondeado a 2 decimales."""
+        try:
+            return round(self.peso / (self.altura**2), 2)
+        except:
+            return None
 
-    # ------------------------------------------------------------------
-    # +⬇Serialización  (método opcional)
-    # ------------------------------------------------------------------
-    def to_dict(self, include_fotos: bool = False) -> Dict:
+    # ---------- Serialización ----------
+    def to_dict(self, include_fotos=False) -> Dict:
         data = {
             "id": self.id,
             "cliente_id": self.cliente_id,
-            "fecha_registro": (
-                self.fecha_registro.isoformat() if self.fecha_registro else None
-            ),
+            "fecha_registro": self.fecha_registro.isoformat(),
             "peso": self.peso,
             "altura": self.altura,
             "grasa_corporal": self.grasa_corporal,
             "masa_muscular": self.masa_muscular,
+            "imc": self.calcular_imc(),
         }
         if include_fotos:
             data["fotos"] = [f.to_dict() for f in self.fotos]
         return data
 
-    # ------------------------------------------------------------------
-    # +Representación legible
-    # ------------------------------------------------------------------
     def __repr__(self) -> str:
-        fecha = (
-            self.fecha_registro.strftime("%Y-%m-%d")
-            if self.fecha_registro
-            else "inicial"
-        )
-        return f"<ProgresoCliente {self.id} (c={self.cliente_id}) {fecha}>"
+        return f"<ProgresoCliente {self.id} cliente={self.cliente_id} fecha={self.fecha_registro:%Y-%m-%d}>"

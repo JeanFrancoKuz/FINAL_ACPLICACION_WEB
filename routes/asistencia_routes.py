@@ -1,82 +1,101 @@
-from datetime import datetime, date, time, timedelta, timezone
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app
+from datetime import datetime, timezone
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
-# Decorador
-from routes.decoradores import roles_required
-
-# Modelos
 from extensions import db
 from models.asistencias import Asistencia
 from models.clientes import Cliente
+from routes.decoradores import roles_required
+
 
 asistencia_bp = Blueprint("asistencia", __name__, url_prefix="/asistencias")
 
-# ---------------------------------
-# 1️Lista de asistencias (ADMIN only)
-# ---------------------------------
+
+# ======================================================
+# 🔹 1) LISTA GENERAL (SOLO ADMIN)
+# ======================================================
 @asistencia_bp.route("/lista")
 @login_required
 @roles_required("ADMIN")
 def lista_asistencias():
-    """
-    Lista paginada de todas las asistencias (solo rol ADMIN).
-    """
-    page_number = request.args.get("page", 1, type=int)
-    per_page = 20
+    page = request.args.get("page", 1, type=int)
     asistencias = Asistencia.query.order_by(
         Asistencia.fecha.desc()
-    ).paginate(page_number, per_page, error_out=False)
+    ).paginate(page=page, per_page=20, error_out=False)
 
-    return render_template(
-        "admin/lista_asistencias.html",
-        asistencias=asistencias,
-    )
+    return render_template("admin/lista_asistencias.html", asistencias=asistencias)
 
-# ---------------------------------
-#Registrar asistencia (cliente)
-# ---------------------------------
+
+# ======================================================
+# 🔹 2) Registrar asistencia — Cliente
+# ======================================================
 @asistencia_bp.route("/registrar", methods=["POST"])
 @login_required
 def registrar_asistencia():
-    """
-    Registra la asistencia del cliente autenticado en la fecha/hora actual.
-    Se bloquea duplicados por día: solo una asistencia por día.
-    """
-
-    # Validar que el usuario tenga un cliente asociado
     if not current_user.cliente:
-        flash("Tu usuario no está vinculado a un cliente.", "danger")
+        flash("Tu cuenta no está asociada a un perfil de cliente.", "danger")
         return redirect(url_for("index"))
 
     cliente = current_user.cliente
 
-# Evitar duplicados comparando la fecha (sin hora)
-    hoy_iso = datetime.utcnow().date().isoformat()
-    existente = Asistencia.query.filter(
-        Asistencia.cliente_id == cliente.id,
-        db.func.date(Asistencia.fecha) == hoy_iso
-    ).first()
+    # Evitar duplicado por fecha (conversión correcta a DATE ISO)
+    hoy = datetime.now(timezone.utc).date()
+
+    existente = (
+        Asistencia.query.filter(Asistencia.cliente_id == cliente.id)
+        .filter(db.func.date(Asistencia.fecha) == hoy)
+        .first()
+    )
 
     if existente:
-        flash("Ya registraste tu asistencia para hoy.", "warning")
+        flash("Ya registraste tu asistencia hoy.", "warning")
         return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
 
-    # Guardar asistencia (usar UTC)
-    nueva = Asistencia(cliente_id=cliente.id, fecha=datetime.utcnow())
+    nueva = Asistencia(cliente_id=cliente.id, fecha=datetime.now(timezone.utc))
+
     db.session.add(nueva)
     try:
         db.session.commit()
         flash("Asistencia registrada correctamente.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Error al registrar la asistencia: {str(e)}", "danger")
+        flash(f"Error al guardar asistencia: {e}", "danger")
+
     return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
 
-# ---------------------------------
-# Borrar asistencia (admin)
-# ---------------------------------
 
+# ======================================================
+# 🔹 3) Historial del cliente (solo cliente)
+# ======================================================
+@asistencia_bp.route("/historial")
+@login_required
+@roles_required("CLIENTE")
+def historial_asistencias_cliente():
+    asistencias = (
+        Asistencia.query.filter_by(cliente_id=current_user.cliente.id)
+        .order_by(Asistencia.fecha.desc())
+        .all()
+    )
+
+    return render_template("cliente/historial_asistencias.html", asistencias=asistencias)
+
+
+# ======================================================
+# 🔹 4) Historial admin por cliente
+# ======================================================
+@asistencia_bp.route("/cliente/<int:id>")
+@login_required
+@roles_required("ADMIN")
+def historial_cliente_admin(id):
+    cliente = Cliente.query.get_or_404(id)
+    asistencias = Asistencia.query.filter_by(cliente_id=id).order_by(Asistencia.fecha.desc()).all()
+
+    return render_template("admin/historial_asistencias_cliente.html", cliente=cliente, asistencias=asistencias)
+
+
+# ======================================================
+# 🔹 5) Eliminar asistencia — ADMIN
+# ======================================================
 @asistencia_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
 @roles_required("ADMIN")
@@ -85,8 +104,9 @@ def eliminar_asistencia(id):
     try:
         db.session.delete(asistencia)
         db.session.commit()
-        flash("Asistencia eliminada correctamente.", "success")
+        flash("Asistencia eliminada.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"No se pudo eliminar la asistencia: {str(e)}", "danger")
+        flash(f"No se pudo eliminar: {e}", "danger")
+
     return redirect(url_for("asistencia.lista_asistencias"))
