@@ -40,12 +40,6 @@ def create_app():
     app.register_blueprint(progreso_bp)
     app.register_blueprint(reportes_bp)
 
-    # --- MOSTRAR TODAS LAS RUTAS ---
-    print("\n=== RUTAS REGISTRADAS EN FLASK ===")
-    for rule in app.url_map.iter_rules():
-        print(rule)
-    print("==================================\n")
-
     @app.route("/")
     def index():
         return render_template('public/landing.html')
