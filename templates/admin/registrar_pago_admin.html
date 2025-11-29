@@ -1,31 +1,55 @@
 {% extends "base/layout_admin.html" %}
-
-{% block title %}Registrar Pago{% endblock %}
+{% block title %}Registrar Pago - Admin{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Registrar Pago - {{ cliente.nombre }}</h1>
 
-<form method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="monto" class="form-label">Monto:</label>
-        <input type="number" step="0.01" name="monto" id="monto" class="form-control" required>
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold">Registrar Pago</h2>
+    <a href="{{ url_for('pago.lista_pagos') }}" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+<!-- Info rápida del Cliente -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-1">{{ cliente.nombre }}</h5>
+        <p class="mb-1"><strong>Cédula:</strong> {{ cliente.cedula }}</p>
+        <p class="mb-1"><strong>Correo:</strong> {{ cliente.correo }}</p>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label for="tipo" class="form-label">Tipo de pago:</label>
-        <select name="tipo" id="tipo" class="form-select" required>
-            <option value="EFECTIVO">Efectivo</option>
-            <option value="TRANSFERENCIA">Transferencia</option>
-            <option value="TARJETA">Tarjeta</option>
-        </select>
+<!-- ================== FORMULARIO ================== -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" class="row g-3">
+
+            <!-- MONTO -->
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Monto a Registrar</label>
+                <input type="number" step="0.01" name="monto" class="form-control shadow-sm" required>
+            </div>
+
+            <!-- TIPO DE PAGO -->
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Tipo de Pago</label>
+                <select name="tipo" class="form-select shadow-sm" required>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="TARJETA">Tarjeta</option>
+                </select>
+            </div>
+
+            <!-- COMPROBANTE -->
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Comprobante (opcional)</label>
+                <input type="file" name="comprobante" accept=".jpg,.jpeg,.png,.pdf" class="form-control shadow-sm">
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success px-4 fw-semibold">Registrar Pago</button>
+                <a href="{{ url_for('pago.lista_pagos') }}" class="btn btn-dark">Cancelar</a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label for="comprobante" class="form-label">Comprobante (opcional):</label>
-        <input type="file" name="comprobante" id="comprobante" class="form-control">
-    </div>
-
-    <button type="submit" class="btn btn-primary">Registrar Pago</button>
-    <a href="{{ url_for('pago.lista_pagos') }}" class="btn btn-secondary">Cancelar</a>
-</form>
 {% endblock %}

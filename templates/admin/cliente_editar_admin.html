@@ -1,74 +1,93 @@
 {% extends "base/layout_admin.html" %}
-
 {% block title %}Editar Cliente{% endblock %}
 
 {% block content %}
-<h2 class="fw-bold mb-4">Editar Cliente</h2>
 
-<div class="card shadow-sm mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold">Editar Cliente</h2>
+    <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+
+<div class="card shadow-sm">
     <div class="card-body">
 
-        <!-- Formulario de edición -->
-        <form action="{{ url_for('admin.editar_cliente', id=cliente.id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('admin.editar_cliente', id=cliente.id) }}" 
+                method="POST" enctype="multipart/form-data" class="row g-3">
 
-            <!-- Nombre -->
-            <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre }}" required>
+            <!-- 🧍 Datos Personales -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Nombre Completo</label>
+                <input type="text" name="nombre" class="form-control"
+                        value="{{ cliente.nombre }}" required placeholder="Nombre del cliente">
             </div>
 
-            <!-- Correo -->
-            <div class="mb-3">
-                <label class="form-label">Correo Electrónico</label>
-                <input type="email" name="correo" class="form-control" value="{{ cliente.correo }}" required>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Correo Electrónico</label>
+                <input type="email" name="correo" class="form-control"
+                        value="{{ cliente.correo }}" required placeholder="correo@example.com">
             </div>
 
-            <!-- Cédula -->
-            <div class="mb-3">
-                <label class="form-label">Cédula</label>
-                <input type="text" name="cedula" class="form-control" value="{{ cliente.cedula }}" required>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Cédula</label>
+                <input type="text" name="cedula" class="form-control"
+                        value="{{ cliente.cedula }}" required>
             </div>
 
-            <!-- Teléfono -->
-            <div class="mb-3">
-                <label class="form-label">Teléfono</label>
-                <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}" required>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Teléfono</label>
+                <input type="text" name="telefono" class="form-control"
+                        value="{{ cliente.telefono }}" required>
             </div>
 
-            <!-- Estado membresía -->
-            <div class="mb-3">
-                <label class="form-label">Estado de Membresía</label>
+            <!-- 📅 Estado & Membresía -->
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Estado Membresía</label>
                 <select name="estado_membresia" class="form-select" required>
                     {% for estado in ['ACTIVO','INACTIVO','PENDIENTE','SUSPENDIDO','VENCIDO'] %}
-                        <option value="{{ estado }}" {% if cliente.estado_membresia.value == estado %}selected{% endif %}>
+                        <option value="{{ estado }}"
+                            {% if cliente.estado_membresia.value == estado %}selected{% endif %}>
                             {{ estado }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
 
-            <!-- Fecha ingreso -->
-            <div class="mb-3">
-                <label class="form-label">Fecha de Ingreso</label>
-                <input type="date" name="fecha_ingreso" class="form-control" value="{{ cliente.fecha_ingreso.strftime('%Y-%m-%d') }}" required>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Fecha de Ingreso</label>
+                <input type="date" name="fecha_ingreso" class="form-control"
+                        value="{{ cliente.fecha_ingreso.strftime('%Y-%m-%d') }}" required>
             </div>
 
-            <!-- Vencimiento de membresía -->
-            <div class="mb-3">
-                <label class="form-label">Fecha de Vencimiento de Membresía</label>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Vencimiento</label>
                 <input type="date" name="membresia_vencimiento" class="form-control"
                         value="{{ cliente.membresia_vencimiento.strftime('%Y-%m-%d') if cliente.membresia_vencimiento else '' }}">
             </div>
 
-            <!-- Foto de perfil (opcional) -->
-            <div class="mb-3">
-                <label class="form-label">Actualizar Foto de Perfil (opcional)</label>
+            <!-- 📷 Foto actual / nueva -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Nueva Foto (opcional)</label>
                 <input type="file" name="foto_perfil" class="form-control" accept="image/*">
+                <small class="text-muted">Formatos permitidos: JPG/PNG</small>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <p class="fw-semibold">Foto actual</p>
+
+                {% if cliente.foto_perfil %}
+                        <img src="{{ url_for('static', filename=cliente.foto_perfil) }}" 
+                            class="rounded shadow-sm border" 
+                            style="width:120px;height:120px;object-fit:cover;">
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/placeholder_profile.png') }}" 
+                            class="rounded shadow-sm border"
+                            style="width:120px;height:120px;object-fit:cover;">
+                {% endif %}
             </div>
 
             <!-- Botones -->
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <div class="col-12 text-end mt-3">
+                <button type="submit" class="btn btn-primary px-4">Guardar</button>
                 <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-secondary">Cancelar</a>
             </div>
 

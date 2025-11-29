@@ -1,7 +1,9 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top border-bottom">
     <div class="container">
 
-        <a class="navbar-brand fw-bold text-uppercase" href="{{ url_for('cliente.dashboard_cliente') }}">
+        <!-- LOGO -->
+        <a class="navbar-brand fw-bold text-uppercase d-flex align-items-center gap-2"
+           href="{{ url_for('cliente.dashboard_cliente') }}">
             🏋 HITO Cliente
         </a>
 
@@ -13,26 +15,36 @@
             <ul class="navbar-nav ms-auto gap-lg-3">
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('cliente.dashboard_cliente') }}">📊 Dashboard</a>
+                    <a class="nav-link {% if 'dashboard_cliente' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('cliente.dashboard_cliente') }}">
+                        📊 Dashboard
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
+                    <a class="nav-link {% if 'detalles_cliente' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
                         👤 Mi Perfil
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('pago.registrar_pago', cliente_id=current_user.cliente.id) }}">
-                        💰 Registrar Pago
+                    <a class="nav-link {% if 'registrar_pago_cliente' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('cliente.registrar_pago_cliente') }}">
+                        💳 Registrar Pago
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('progreso.historial_progreso') }}">
+                    <a class="nav-link {% if 'progreso' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('progreso.historial_progreso') }}">
                         📈 Mi Progreso
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <form action="{{ url_for('auth.logout') }}" method="POST">
-                        <button class="btn btn-danger btn-sm">Salir</button>
+                    <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
+                        <button class="btn btn-outline-danger btn-sm px-3">⛔ Salir</button>
                     </form>
                 </li>
 
@@ -40,3 +52,19 @@
         </div>
     </div>
 </nav>
+
+<style>
+    .navbar .nav-link {
+        font-weight: 500;
+        transition: .3s;
+    }
+    .navbar .nav-link:hover {
+        color: #ff9800 !important;
+    }
+    .navbar .active {
+        color: #ff9800 !important;
+        border-bottom: 2px solid #ff9800;
+        padding-bottom: 3px;
+        font-weight: 600;
+    }
+</style>

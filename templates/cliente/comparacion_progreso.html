@@ -1,0 +1,61 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Comparación de Progreso{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4 text-center">📊 Comparación de Progreso</h2>
+
+{% if progreso_inicial and progreso_reciente %}
+
+<div class="row justify-content-center g-4">
+
+    <!-- Tarjeta inicial -->
+    <div class="col-md-5">
+        <div class="card bg-dark text-light shadow">
+            <div class="card-header text-center bg-secondary">
+                <h5 class="fw-bold m-0">📍 Primer Registro</h5>
+            </div>
+            <div class="card-body">
+                <p><b>📅 Fecha:</b> {{ progreso_inicial.fecha_registro.strftime('%d/%m/%Y') }}</p>
+                <p><b>⚖ Peso:</b> {{ progreso_inicial.peso }} kg</p>
+                <p><b>📏 Altura:</b> {{ progreso_inicial.altura }} m</p>
+                <p><b>🔥 IMC:</b> {{ progreso_inicial.calcular_imc() }}</p>
+                <p><b>💪 Muscular:</b> {{ progreso_inicial.masa_muscular or "N/A" }}%</p>
+                <p><b>🏷 Grasa:</b> {{ progreso_inicial.grasa_corporal or "N/A" }}%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta más reciente -->
+    <div class="col-md-5">
+        <div class="card bg-dark text-light shadow">
+            <div class="card-header text-center bg-success">
+                <h5 class="fw-bold m-0">🏆 Progreso más reciente</h5>
+            </div>
+            <div class="card-body">
+                <p><b>📅 Fecha:</b> {{ progreso_reciente.fecha_registro.strftime('%d/%m/%Y') }}</p>
+                <p><b>⚖ Peso:</b> {{ progreso_reciente.peso }} kg</p>
+                <p><b>📏 Altura:</b> {{ progreso_reciente.altura }} m</p>
+                <p><b>🔥 IMC:</b> {{ progreso_reciente.calcular_imc() }}</p>
+                <p><b>💪 Muscular:</b> {{ progreso_reciente.masa_muscular or "N/A" }}%</p>
+                <p><b>🏷 Grasa:</b> {{ progreso_reciente.grasa_corporal or "N/A" }}%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4">
+
+<div class="text-center">
+    <a href="{{ url_for('progreso.historial_progreso') }}" class="btn btn-light">
+        🔙 Volver al historial
+    </a>
+</div>
+
+{% else %}
+<div class="alert alert-warning text-center">
+    Necesitas al menos <b>2 registros de progreso</b> para comparar 📈
+</div>
+{% endif %}
+
+{% endblock %}

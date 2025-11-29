@@ -1,0 +1,62 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Historial de Progreso{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Historial de Progreso</h2>
+    <a href="{{ url_for('progreso.registrar_progreso') }}" class="btn btn-success">
+        Registrar nuevo progreso ✚
+    </a>
+</div>
+
+{% if progresos|length == 0 %}
+<div class="alert alert-info text-center fw-semibold">Aún no has registrado progreso 📉</div>
+{% endif %}
+
+<div class="row g-4">
+
+    {% for p in progresos %}
+    <div class="col-md-4">
+        <div class="card bg-dark text-light border border-secondary shadow-sm">
+
+            <div class="card-header text-center fw-bold bg-secondary">
+                {{ p.fecha_registro.strftime('%d/%m/%Y %H:%M') }}
+            </div>
+
+            <div class="card-body">
+
+                <p><b>Peso:</b> {{ p.peso }} kg</p>
+                <p><b>Altura:</b> {{ p.altura }} m</p>
+
+                <p><b>IMC:</b>
+                    {% set imc = p.calcular_imc() %}
+                    {% if imc %}
+                        <span class="text-info fw-bold">{{ imc }}</span>
+                    {% else %}
+                        <span class="text-warning">No calculado</span>
+                    {% endif %}
+                </p>
+
+                {% if p.grasa_corporal %}
+                    <p><b>Grasa corporal:</b> {{ p.grasa_corporal }} %</p>
+                {% endif %}
+
+                {% if p.masa_muscular %}
+                    <p><b>Masa muscular:</b> {{ p.masa_muscular }} %</p>
+                {% endif %}
+
+                <hr>
+
+                <a href="{{ url_for('progreso.subir_foto_progreso', progreso_id=p.id) }}" 
+                    class="btn btn-outline-warning btn-sm w-100">
+                    Subir fotos 📸
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

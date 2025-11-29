@@ -1,0 +1,60 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Reportes - Admin{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">📊 Reporte General del Sistema</h2>
+
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('reportes.descargar_general_pdf') }}" class="btn btn-success">
+        📄 Descargar PDF
+    </a>
+</div>
+
+<div class="row g-4">
+
+    <!-- Clientes -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold text-primary">👥 Clientes</h5>
+                <p><strong>Total:</strong> {{ total_clientes }}</p>
+                <p class="text-success"><strong>Activos:</strong> {{ activos }}</p>
+                <p class="text-danger"><strong>Vencidos:</strong> {{ vencidos }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagos -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold text-warning">💵 Pagos</h5>
+                <p><strong>Total:</strong> {{ total_pagos }}</p>
+                <p class="text-success"><strong>Validados:</strong> {{ pagos_validados }}</p>
+                <p class="text-danger"><strong>Rechazados:</strong> {{ pagos_rechazados }}</p>
+                <p class="text-secondary"><strong>Pendientes:</strong> {{ pagos_pendientes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asistencias -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold text-info">🟦 Asistencias</h5>
+                <p><strong>Este mes:</strong> {{ asistencias_mes }}</p>
+                
+                <h6 class="mt-3 text-secondary">Por día:</h6>
+                <ul class="ps-3">
+                    {% for dia, total in asistencias_por_dia.items() %}
+                        <li><strong>{{ dia }}:</strong> {{ total }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

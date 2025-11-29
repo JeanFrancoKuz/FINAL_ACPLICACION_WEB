@@ -1,0 +1,74 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Registrar Progreso{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Registrar Progreso Físico</h2>
+
+    <a href="{{ url_for('progreso.historial_progreso') }}" 
+        class="btn btn-outline-light btn-sm">
+        ← Volver al historial
+    </a>
+</div>
+
+<!-- 🔥 Contador / Estado -->
+<div class="alert alert-info shadow-sm">
+    📌 Registros guardados: 
+    <b>{{ total }}/{{ limite }}</b> progreso(s)
+
+    {% if total >= limite %}
+        <br>
+        <span class="text-warning fw-semibold">
+            ⚠ Has alcanzado el límite de {{ limite }} registros.
+            El más antiguo será eliminado cuando guardes un nuevo progreso.
+        </span>
+    {% endif %}
+</div>
+
+<div class="card bg-dark text-light shadow-lg border border-secondary">
+    <div class="card-body">
+
+        <form method="POST" class="row g-4">
+
+            <!-- Peso -->
+            <div class="col-md-6">
+                <label class="form-label text-info fw-semibold">Peso (kg) *</label>
+                <input type="number" class="form-control" 
+                        name="peso" step="0.1" min="1" required>
+            </div>
+
+            <!-- Altura -->
+            <div class="col-md-6">
+                <label class="form-label text-info fw-semibold">Altura (m) *</label>
+                <input type="number" class="form-control" 
+                        name="altura" step="0.01" min="0.1" required>
+            </div>
+
+            <!-- Grasa corporal -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Grasa corporal (%)</label>
+                <input type="number" class="form-control" 
+                        name="grasa_corporal" step="0.1" min="0" max="100">
+            </div>
+
+            <!-- Masa muscular -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Masa muscular (%)</label>
+                <input type="number" class="form-control" 
+                        name="masa_muscular" step="0.1" min="0" max="100">
+            </div>
+
+            <!-- Botón -->
+            <div class="col-12 text-end mt-3">
+                <button class="btn btn-success px-4 fw-bold">
+                    Guardar progreso ✔
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

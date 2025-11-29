@@ -1,49 +1,52 @@
 {% extends "base/layout_admin.html" %}
-
 {% block title %}Clientes - Admin{% endblock %}
 
 {% block content %}
 
-<h2 class="fw-bold mb-4">Gestión de Clientes</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Gestión de Clientes</h2>
+    <a href="{{ url_for('admin.crear_cliente') }}" class="btn btn-primary">
+        <i class="bi bi-person-plus"></i> Nuevo Cliente
+    </a>
+</div>
 
-<div class="card shadow-sm mb-4">
+<div class="card shadow-sm">
     <div class="card-body">
 
-        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+        <!-- 🔍 Filtro y Búsqueda -->
+        <form class="row g-2 mb-3" method="GET" action="{{ url_for('admin.lista_clientes') }}">
 
-            <!-- Botón agregar cliente -->
-            <a href="{{ url_for('admin.crear_cliente') }}" class="btn btn-primary">
-                <i class="bi bi-person-plus"></i> Registrar Cliente
-            </a>
+            <div class="col-md-4">
+                <input type="text" 
+                        name="q" 
+                        value="{{ request.args.get('q','') }}"
+                        placeholder="Buscar por nombre, cédula o correo..."
+                        class="form-control">
+            </div>
 
-            <!-- Formulario búsqueda y filtro -->
-            <form class="d-flex gap-2" method="GET" action="{{ url_for('admin.lista_clientes') }}">
-                <input 
-                    type="text" 
-                    name="q" 
-                    value="{{ request.args.get('q','') }}" 
-                    class="form-control" 
-                    placeholder="Buscar cliente..."
-                >
-
+            <div class="col-md-3">
                 <select name="estado" class="form-select">
                     <option value="">Todos los estados</option>
-                    <option value="ACTIVO" {% if request.args.get('estado')=='ACTIVO' %}selected{% endif %}>ACTIVO</option>
-                    <option value="INACTIVO" {% if request.args.get('estado')=='INACTIVO' %}selected{% endif %}>INACTIVO</option>
-                    <option value="PENDIENTE" {% if request.args.get('estado')=='PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
-                    <option value="SUSPENDIDO" {% if request.args.get('estado')=='SUSPENDIDO' %}selected{% endif %}>SUSPENDIDO</option>
-                    <option value="VENCIDO" {% if request.args.get('estado')=='VENCIDO' %}selected{% endif %}>VENCIDO</option>
+                    {% for e in ['ACTIVO','INACTIVO','PENDIENTE','SUSPENDIDO','VENCIDO'] %}
+                        <option value="{{ e }}" 
+                                {% if request.args.get('estado') == e %} selected {% endif %}>
+                            {{ e }}
+                        </option>
+                    {% endfor %}
                 </select>
+            </div>
 
-                <button type="submit" class="btn btn-outline-secondary">
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-outline-dark">
                     <i class="bi bi-funnel"></i> Filtrar
                 </button>
-            </form>
-        </div>
+            </div>
 
-        <!-- TABLA -->
+        </form>
+
+        <!-- 📄 Tabla -->
         <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
+            <table class="table table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
@@ -53,83 +56,77 @@
                         <th>Estado</th>
                         <th>Ingreso</th>
                         <th>Vencimiento</th>
-                        <th width="260">Acciones</th>
+                        <th class="text-center" width="270">Acciones</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    {% for cliente in clientes %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ cliente.nombre }}</td>
-                        <td>{{ cliente.correo }}</td>
-                        <td>{{ cliente.cedula }}</td>
 
-                        <!-- Estado con badge -->
-                        <td>
-                            <span class="badge 
-                                {% if cliente.estado_membresia.value=='ACTIVO' %}bg-success
-                                {% elif cliente.estado_membresia.value=='INACTIVO' %}bg-secondary
-                                {% elif cliente.estado_membresia.value=='PENDIENTE' %}bg-warning
-                                {% elif cliente.estado_membresia.value=='SUSPENDIDO' %}bg-danger
-                                {% elif cliente.estado_membresia.value=='VENCIDO' %}bg-dark
-                                {% endif %}">
-                                {{ cliente.estado_membresia.value }}
-                            </span>
-                        </td>
+                {% for cliente in clientes %}
+                <tr>
+                    <td class="text-muted">{{ loop.index }}</td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.correo or "-" }}</td>
+                    <td>{{ cliente.cedula }}</td>
 
-                        <!-- Fechas -->
-                        <td>{{ cliente.fecha_ingreso.strftime('%d-%m-%Y') }}</td>
-                        <td>
-                            {% if cliente.membresia_vencimiento %}
-                                {{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') }}
-                            {% else %}
-                                -
+                    <!-- Badge Estado -->
+                    <td>
+                        <span class="badge 
+                            {% if cliente.estado_membresia.value == 'ACTIVO' %}bg-success
+                            {% elif cliente.estado_membresia.value == 'INACTIVO' %}bg-secondary
+                            {% elif cliente.estado_membresia.value == 'PENDIENTE' %}bg-warning
+                            {% elif cliente.estado_membresia.value == 'SUSPENDIDO' %}bg-danger
+                            {% elif cliente.estado_membresia.value == 'VENCIDO' %}bg-dark
                             {% endif %}
-                        </td>
-                        <!-- Acciones -->
-                        <td>
-                            <a href="{{ url_for('admin.cliente_detalle_admin', id=cliente.id) }}" 
-                                class="btn btn-info btn-sm">
-                                Ver
+                            ">
+                            {{ cliente.estado_membresia.value }}
+                        </span>
+                    </td>
+
+                    <td>{{ cliente.fecha_ingreso.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') if cliente.membresia_vencimiento else '-' }}</td>
+
+                    <td class="text-center">
+
+                        <a href="{{ url_for('admin.cliente_detalle_admin', id=cliente.id) }}" class="btn btn-info btn-sm">
+                            Detalle
+                        </a>
+
+                        <a href="{{ url_for('admin.editar_cliente', id=cliente.id) }}" class="btn btn-warning btn-sm">
+                            Editar
+                        </a>
+
+                        <form action="{{ url_for('admin.eliminar_cliente', id=cliente.id) }}"
+                                method="POST" class="d-inline">
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Eliminar cliente definitivamente?');">
+                                Eliminar
+                            </button>
+                        </form>
+
+                        {% if cliente.estado_membresia.value == 'VENCIDO' and cliente.telefono %}
+                            {% set mensaje = (
+                                'Hola ' ~ cliente.nombre ~ ', tu membresía expiró el ' ~
+                                cliente.membresia_vencimiento.strftime('%d-%m-%Y') ~
+                                '. Te invitamos a renovarla para volver a entrenar en HITO ALL SPORT 💪🔥'
+                            ) %}
+                            <a href="https://wa.me/{{ cliente.telefono|replace('+','') }}?text={{ mensaje|urlencode }}"
+                                target="_blank"
+                                class="btn btn-success btn-sm mt-1">
+                                WhatsApp
                             </a>
+                        {% endif %}
 
-                            <a href="{{ url_for('admin.editar_cliente', id=cliente.id) }}" 
-                                class="btn btn-warning btn-sm">
-                                Editar
-                            </a>
+                    </td>
+                </tr>
 
-                            <!-- FORMULARIO POST PARA BORRAR -->
-                            <form action="{{ url_for('admin.eliminar_cliente', id=cliente.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar cliente?');">
-                                    Borrar
-                                </button>
-                            </form>
+                {% else %}
+                <tr><td colspan="8" class="text-center py-4 text-muted">No hay resultados.</td></tr>
+                {% endfor %}
 
-                            {% if cliente.estado_membresia.value == 'VENCIDO' %}
-                                {% set mensaje = 
-                                    'Hola ' ~ cliente.nombre ~ ', tu membresía venció el ' ~ 
-                                    cliente.membresia_vencimiento.strftime('%d-%m-%Y') ~ 
-                                    '. Por favor renueva pronto para seguir entrenando en HITO ALL SPORT.' 
-                                %}
-                                <a href="https://wa.me/{{ cliente.telefono|replace('+','') }}?text={{ mensaje|urlencode }}"
-                                    target="_blank"
-                                    class="btn btn-success btn-sm mt-1">
-                                    WhatsApp
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            No hay clientes que coincidan con la búsqueda.
-                        </td>
-                    </tr>
-                    {% endfor %}
                 </tbody>
             </table>
         </div>
+
     </div>
 </div>
 

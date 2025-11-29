@@ -25,49 +25,49 @@ def get_dir():
 # =======================================================
 # 📌 HISTORIAL DEL CLIENTE — SOLO CLIENTE
 # =======================================================
-@progreso_bp.route("/historial")
-@login_required
-@roles_required("CLIENTE")
-def historial_progreso():
-    progresos = ProgresoCliente.query.filter_by(
-        cliente_id=current_user.cliente.id
-    ).order_by(ProgresoCliente.fecha_registro.desc()).all()
-
-    return render_template("cliente/historial_progreso.html", progresos=progresos)
-
-
-# =======================================================
-# ➕ Registrar nuevo progreso físico
-# =======================================================
 @progreso_bp.route("/registrar", methods=["GET", "POST"])
 @login_required
 @roles_required("CLIENTE")
 def registrar_progreso():
+    cliente = current_user.cliente
+
+    # Obtener total de progresos existentes
+    progresos = ProgresoCliente.query.filter_by(cliente_id=cliente.id)\
+                                    .order_by(ProgresoCliente.fecha_registro.desc()).all()
+
+    limite = 12
+
     if request.method == "POST":
+        # Si llega a 12, eliminamos el más antiguo antes de registrar el nuevo
+        if len(progresos) >= limite:
+            progreso_antiguo = progresos[-1]  # último en lista = el más antiguo
+            db.session.delete(progreso_antiguo)
+            db.session.commit()
+
+            flash(f"⚠ Se alcanzó el límite de 12 progresos. El registro más antiguo fue eliminado automáticamente.", "warning")
+
+        # Registrar nuevo progreso
         try:
             nuevo = ProgresoCliente(
-                cliente_id=current_user.cliente.id,
+                cliente_id=cliente.id,
                 fecha_registro=datetime.now(timezone.utc),
                 peso=float(request.form.get("peso")),
                 altura=float(request.form.get("altura")),
                 grasa_corporal=float(request.form.get("grasa_corporal")) if request.form.get("grasa_corporal") else None,
-                masa_muscular=float(request.form.get("masa_muscular")) if request.form.get("masa_muscular") else None
+                masa_muscular=float(request.form.get("masa_muscular")) if request.form.get("masa_muscular") else None,
             )
+
             db.session.add(nuevo)
             db.session.commit()
 
-            flash("Progreso registrado correctamente.", "success")
-        except ValueError as e:
-            db.session.rollback()
-            flash(str(e), "danger")
+            flash("Progreso registrado correctamente ✔", "success")
+            return redirect(url_for("progreso.historial_progreso"))
+
         except Exception as e:
             db.session.rollback()
             flash(f"Error al registrar progreso: {e}", "danger")
 
-        return redirect(url_for("progreso.historial_progreso"))
-
-    return render_template("cliente/registrar_progreso.html")
-
+    return render_template("cliente/registrar_progreso.html", total=len(progresos), limite=limite)
 
 # =======================================================
 # 📸 Subir Foto de Progreso
@@ -114,14 +114,54 @@ def subir_foto_progreso(progreso_id):
 
 
 # =======================================================
-# 🔥 Vista para ADMIN — ver progreso de cualquier cliente
+# Historial
 # =======================================================
-@progreso_bp.route("/cliente/<int:cliente_id>")
+@progreso_bp.route("/historial")
 @login_required
-@roles_required("ADMIN")
-def progreso_cliente_admin(cliente_id):
+@roles_required("CLIENTE")
+def historial_progreso():
+
+    # Obtener los progresos por fecha (descendente)
     progresos = ProgresoCliente.query.filter_by(
-        cliente_id=cliente_id
+        cliente_id=current_user.cliente.id
     ).order_by(ProgresoCliente.fecha_registro.desc()).all()
 
-    return render_template("admin/progreso_cliente_admin.html", progresos=progresos, cliente_id=cliente_id)
+    total = len(progresos)
+
+    # Si existen más de 12 → mantener solo los 12 más recientes
+    if total > 12:
+        eliminar = progresos[12:]  # Todo lo que esté después del top 12
+
+        for p in eliminar:
+            db.session.delete(p)
+
+        db.session.commit()
+        flash("📌 Se alcanzó el máximo (12 progresos). Se eliminaron los más antiguos automáticamente.", "warning")
+
+    # Volver a consultar para mostrar solo los válidos
+    progresos = ProgresoCliente.query.filter_by(
+        cliente_id=current_user.cliente.id
+    ).order_by(ProgresoCliente.fecha_registro.desc()).limit(12).all()
+
+    return render_template("cliente/historial_progreso.html", progresos=progresos)
+
+# =======================================================
+# Comparacion
+# =======================================================
+
+@progreso_bp.route("/comparacion")
+@login_required
+@roles_required("CLIENTE")
+def comparar_progreso():
+    progresos = ProgresoCliente.query.filter_by(cliente_id=current_user.cliente.id)\
+                                    .order_by(ProgresoCliente.fecha_registro.asc()).all()
+
+    if len(progresos) < 2:
+        flash("Debes tener al menos 2 progresos para comparar", "warning")
+        return redirect(url_for("progreso.historial_progreso"))
+
+    return render_template(
+        "cliente/comparacion_progreso.html",
+        progreso_inicial=progresos[0],
+        progreso_reciente=progresos[-1]
+    )

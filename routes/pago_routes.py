@@ -55,62 +55,25 @@ def lista_pagos():
 # ===========================================================
 #     🔵 REGISTRAR PAGO COMO CLIENTE
 # ===========================================================
-@pago_bp.route("/registrar/<int:cliente_id>", methods=["GET", "POST"])
-@login_required
-def registrar_pago(cliente_id):
-    cliente = Cliente.query.get_or_404(cliente_id)
-
-    if current_user.rol.nombre.upper() == "CLIENTE" and current_user.cliente.id != cliente_id:
-        abort(403)
-
-    if request.method == "POST":
-        monto = request.form.get("monto")
-        tipo = request.form.get("tipo")
-
-        if not monto or not tipo:
-            flash("Monto y tipo de pago son obligatorios.", "danger")
-            return redirect(request.url)
-
-        try:
-            pago = Pago(
-                cliente_id=cliente.id,
-                monto=float(monto),
-                tipo=TipoPago[tipo.upper()],
-                estado=EstadoPago.PENDIENTE,
-                fecha_pago=datetime.now(timezone.utc)
-            )
-
-            db.session.add(pago)
-            db.session.commit()
-            flash("Pago registrado. Pendiente de revisión.", "success")
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error: {e}", "danger")
-
-        return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
-
-    return render_template("cliente/registrar_pago.html", cliente=cliente)
-
-
-# ===========================================================
-#     🟪 REGISTRO DIRECTO DE ADMIN
-# ===========================================================
-@pago_bp.route("/registrar_admin/<int:cliente_id>", methods=["GET", "POST"])
+@pago_bp.route("/registrar_admin/<int:cliente_id>", methods=["GET","POST"])
 @login_required
 @roles_required("ADMIN")
 def registrar_pago_admin(cliente_id):
 
-    # Si cliente_id = 0 → pantalla de selección
+    # Si cliente_id == 0 → pantalla de selección de cliente
     if cliente_id == 0:
         q = request.args.get("q", "").strip()
-        clientes = Cliente.query.filter(
-            Cliente.nombre.ilike(f"%{q}%") |
-            Cliente.cedula.ilike(f"%{q}%")
-        ).all() if q else Cliente.query.order_by(Cliente.nombre).all()
-
+        clientes = (
+            Cliente.query.filter(
+                Cliente.nombre.ilike(f"%{q}%") |
+                Cliente.cedula.ilike(f"%{q}%")
+            ).all()
+            if q else
+            Cliente.query.order_by(Cliente.nombre).all()
+        )
         return render_template("admin/seleccionar_cliente_pago.html", clientes=clientes)
 
+    # Cliente específico
     cliente = Cliente.query.get_or_404(cliente_id)
 
     if request.method == "POST":
@@ -119,10 +82,11 @@ def registrar_pago_admin(cliente_id):
         archivo = request.files.get("comprobante")
 
         if not monto or not tipo:
-            flash("Monto y tipo de pago son requeridos.", "danger")
+            flash("Monto y tipo requeridos.", "danger")
             return redirect(request.url)
 
         try:
+            # Crear pago VALIDADO
             pago = Pago(
                 cliente_id=cliente.id,
                 monto=float(monto),
@@ -131,29 +95,51 @@ def registrar_pago_admin(cliente_id):
                 fecha_pago=datetime.now(timezone.utc),
             )
             db.session.add(pago)
-            db.session.flush()
+            db.session.flush()  # para tener pago.id
 
-            # 📎 Subida de comprobante opcional
+            # 🟢 ACTUALIZAR MEMBRESÍA AUTOMÁTICAMENTE
+            hoy = datetime.utcnow().date()
+
+            vencimiento_actual = cliente.membresia_vencimiento
+
+            # Normalizar a date si viene como datetime
+            if isinstance(vencimiento_actual, datetime):
+                vencimiento_actual = vencimiento_actual.date()
+
+            if vencimiento_actual and vencimiento_actual >= hoy:
+                # Ya está activa → sumar 1 mes al vencimiento actual
+                cliente.membresia_vencimiento = vencimiento_actual + relativedelta(months=1)
+            else:
+                # Estaba vencida o sin fecha → activar desde hoy
+                cliente.fecha_ingreso = hoy
+                cliente.membresia_vencimiento = hoy + relativedelta(months=1)
+
+            cliente.estado_membresia = EstadoMembresia.ACTIVO
+            db.session.add(cliente)
+
+            # 📎 Comprobante opcional
             if archivo and archivo.filename:
                 ext = os.path.splitext(archivo.filename)[1].lower()
                 if ext not in [".jpg", ".jpeg", ".png", ".pdf"]:
                     flash("Formato no permitido.", "danger")
                     return redirect(request.url)
 
-                filename = secure_filename(f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}")
-                ruta = os.path.join(get_dir(), filename)
-                archivo.save(ruta)
-
-                foto = Foto(
-                    nombre_archivo=filename,
-                    ruta=f"uploads/comprobantes/{filename}",
-                    pago=pago,
-                    uploaded_by=current_user.id
+                filename = secure_filename(
+                    f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
                 )
-                db.session.add(foto)
+                archivo.save(os.path.join(get_dir(), filename))
+
+                db.session.add(
+                    Foto(
+                        nombre_archivo=filename,
+                        ruta=f"uploads/comprobantes/{filename}",
+                        pago=pago,
+                        uploaded_by=current_user.id,
+                    )
+                )
 
             db.session.commit()
-            flash("Pago registrado correctamente", "success")
+            flash("Pago registrado y membresía actualizada ✔", "success")
 
         except Exception as e:
             db.session.rollback()
@@ -161,8 +147,8 @@ def registrar_pago_admin(cliente_id):
 
         return redirect(url_for("pago.lista_pagos"))
 
+    # GET → mostrar formulario
     return render_template("admin/registrar_pago_admin.html", cliente=cliente)
-
 
 # ===========================================================
 #     🟢 VALIDAR/RECHAZAR PAGO

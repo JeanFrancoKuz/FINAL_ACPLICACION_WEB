@@ -1,0 +1,74 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Mis Pagos{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4 text-center">💰 Historial de Pagos</h2>
+
+{% if pagos %}
+
+<div class="table-responsive">
+<table class="table table-dark table-hover text-center align-middle shadow-sm">
+
+    <thead class="table-light text-dark">
+        <tr>
+            <th>#</th>
+            <th>Monto</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Comprobante</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pago in pagos %}
+        <tr>
+            <td>{{ loop.index }}</td>
+
+            <td><strong>${{ pago.monto }}</strong></td>
+
+            <td>{{ pago.tipo.value }}</td>
+
+            <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
+
+            <td>
+                <span class="badge 
+                    {% if pago.estado.value == 'PENDIENTE' %}bg-warning
+                    {% elif pago.estado.value == 'VALIDADO' %}bg-success
+                    {% elif pago.estado.value == 'RECHAZADO' %}bg-danger
+                    {% endif %}
+                ">{{ pago.estado.value }}</span>
+            </td>
+
+            <td>
+                {% if pago.fotos %}
+                    {% for foto in pago.fotos %}
+                        <a href="{{ url_for('static', filename=foto.ruta) }}" 
+                            target="_blank" class="text-info d-block fst-italic">📄 Ver Archivo</a>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">Sin comprobante</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+</div>
+
+{% else %}
+<div class="alert alert-info text-center">
+    Aún no tienes pagos registrados.
+</div>
+{% endif %}
+
+<div class="text-center mt-4">
+    <a href="{{ url_for('pago.registrar_pago', cliente_id=current_user.cliente.id) }}"
+        class="btn btn-primary px-4 fw-bold">
+        Registrar nuevo pago
+    </a>
+</div>
+
+{% endblock %}

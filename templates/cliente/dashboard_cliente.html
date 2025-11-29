@@ -1,0 +1,40 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Dashboard Cliente{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4 fw-bold">Bienvenido, {{ cliente.nombre }}</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card bg-dark text-light shadow p-3">
+            <h5>Membresía</h5>
+            <p>Vence: <strong>{{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') }}</strong></p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-dark text-light shadow p-3">
+            <h5>Asistencias este mes</h5>
+            <h3 class="text-success fw-bold">{{ asistencias_mes }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-dark text-light shadow p-3">
+            <h5>Pagos pendientes</h5>
+            <h3 class="text-warning fw-bold">{{ pagos_pendientes }}</h3>
+        </div>
+    </div>
+
+</div>
+
+<hr class="mt-4">
+
+<div class="d-flex gap-3">
+    <a href="{{ url_for('cliente.registrar_pago_cliente') }}" class="btn btn-success">Registrar Pago</a>
+    <a href="{{ url_for('cliente.detalles_cliente', id=cliente.id) }}" class="btn btn-primary">Ver Perfil</a>
+</div>
+
+{% endblock %}

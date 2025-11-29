@@ -1,0 +1,38 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Subir Foto de Progreso{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Subir foto del progreso</h2>
+    <a href="{{ url_for('progreso.historial_progreso') }}" class="btn btn-secondary btn-sm">Volver</a>
+</div>
+
+<div class="card bg-dark text-light shadow">
+    <div class="card-body">
+
+        <p class="mb-3">
+            📅 <b>Fecha del registro:</b> {{ progreso.fecha_registro.strftime('%d/%m/%Y') }}<br>
+            ⚖ <b>Peso:</b> {{ progreso.peso }} kg <br>
+            📏 <b>Altura:</b> {{ progreso.altura }} m <br>
+            🧠 <b>IMC:</b> {{ progreso.calcular_imc() }}
+        </p>
+
+        <hr>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <label class="form-label fw-semibold">Seleccione una imagen (.jpg / .png)</label>
+            <input type="file" name="foto" class="form-control mb-3" accept="image/png, image/jpeg" required>
+
+            <div class="text-end mt-3">
+                <button class="btn btn-success px-4">
+                    Guardar imagen 📸
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

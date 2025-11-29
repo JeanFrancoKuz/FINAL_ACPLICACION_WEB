@@ -1,0 +1,30 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Mi Progreso{% endblock %}
+{% block content %}
+
+<h2 class="fw-bold">Evolución del progreso físico</h2>
+
+<a class="btn btn-success mb-3" href="{{ url_for('cliente.registrar_progreso') }}">
+    Registrar nuevo progreso
+</a>
+
+<div class="row g-4">
+
+{% for p in progreso %}
+<div class="col-md-4">
+    <div class="card bg-dark text-light shadow-sm p-2">
+        <p><strong>Fecha:</strong> {{ p.fecha.strftime('%d-%m-%Y') }}</p>
+        <p>Peso: <strong>{{ p.peso }}kg</strong></p>
+
+        {% if p.foto %}
+            <img src="{{ url_for('static', filename=p.foto) }}" class="img-fluid rounded">
+        {% endif %}
+    </div>
+</div>
+{% else %}
+    <p>No hay registros aún.</p>
+{% endfor %}
+
+</div>
+
+{% endblock %}

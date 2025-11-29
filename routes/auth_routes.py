@@ -9,7 +9,6 @@ auth_bp = Blueprint(
     "auth", __name__, url_prefix="/auth", template_folder="../templates/auth"
 )
 
-
 # ───────────────────────── LOGIN ───────────────────────── #
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -36,14 +35,18 @@ def login():
             flash("Contraseña incorrecta.", "danger")
             return redirect(url_for("auth.login"))
 
-        # 🔥 Login exitoso
+        # 🔥 LOGIN exitoso
         login_user(usuario, remember="remember_me" in request.form)
-
         usuario.last_login = datetime.now(timezone.utc)
         db.session.commit()
+
         flash(f"Bienvenido {usuario.nombre}", "success")
 
-        # Redirecciones por rol
+        # 🚨 Si es su primer ingreso → obligamos a cambiar clave
+        if usuario.primera_vez:
+            return redirect(url_for("auth.cambiar_password_inicio"))
+
+        # Redirecciones por Rol
         match usuario.rol.nombre.upper():
             case "ADMIN":
                 return redirect(url_for("admin.dashboard_admin"))
@@ -55,14 +58,45 @@ def login():
     return render_template("auth/login.html")
 
 
+# ───────────────────────── CAMBIO DE CONTRASEÑA PRIMER ACCESO ───────────────────────── #
+@auth_bp.route("/primer-cambio", methods=["GET","POST"])
+@login_required
+def cambiar_password_inicio():
+
+    # Solo debe acceder si tiene clave temporal
+    if not current_user.primera_vez:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        nueva = request.form.get("password","").strip()
+
+        if len(nueva) < 6:
+            flash("La nueva contraseña debe tener mínimo 6 caracteres.", "danger")
+            return redirect(url_for("auth.cambiar_password_inicio"))
+
+        current_user.set_password(nueva)
+        current_user.primera_vez = False  # 🚀 ya no volverá aquí
+        db.session.commit()
+
+        flash("Contraseña guardada con éxito. Bienvenido 👏", "success")
+
+        if current_user.rol.nombre.upper() == "ADMIN":
+            return redirect(url_for("admin.dashboard_admin"))
+        else:
+            return redirect(url_for("cliente.dashboard_cliente"))
+
+    return render_template("auth/primer_cambio_password.html")
+
+
 # ───────────────────────── LOGOUT ───────────────────────── #
-@auth_bp.route("/logout")
+@auth_bp.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
     nombre = current_user.nombre
     logout_user()
     flash(f"Hasta pronto, {nombre}. Sesión cerrada.", "info")
     return redirect(url_for("auth.login"))
+
 
 
 # ───────────────────────── RESET PASSWORD REQUEST ───────────────────────── #
@@ -73,7 +107,6 @@ def reset_password_request():
         usuario = Usuario.query.filter_by(correo=correo).first()
 
         if usuario:
-            # 🔥 En producción se reemplaza por token seguro con Flask-Mail
             return redirect(url_for("auth.reset_password", id=usuario.id))
 
         flash("No existe un usuario registrado con ese correo.", "danger")
@@ -81,7 +114,7 @@ def reset_password_request():
     return render_template("auth/reset_password_request.html")
 
 
-# ───────────────────────── RESET PASSWORD (DIRECTO POR DEMO) ───────────────────────── #
+# ───────────────────────── RESET PASSWORD (DEMO) ───────────────────────── #
 @auth_bp.route("/reset/<int:id>", methods=["GET", "POST"])
 def reset_password(id):
     usuario = Usuario.query.get_or_404(id)

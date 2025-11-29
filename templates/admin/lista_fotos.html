@@ -1,0 +1,83 @@
+{% extends "base/layout_admin.html" %}
+{% block title %}Gestión de Fotos{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4">📁 Gestión de Fotografías</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        {% if fotos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Vista Previa</th>
+                        <th>Archivo</th>
+                        <th>Cliente Asociado</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for foto in fotos %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+
+                        <!-- Miniatura -->
+                        <td>
+                            {% if foto.ruta.endswith('mp4') %}
+                                🎥 Video
+                            {% else %}
+                                <img src="{{ url_for('static', filename=foto.ruta) }}"
+                                        width="70" height="70"
+                                        class="rounded border"
+                                        style="object-fit: cover;">
+                            {% endif %}
+                        </td>
+
+                        <!-- Nombre archivo -->
+                        <td>{{ foto.nombre_archivo }}</td>
+
+                        <!-- Cliente vinculado -->
+                        <td>
+                            {% if foto.cliente %}
+                                <a href="{{ url_for('admin.cliente_detalle_admin', id=foto.cliente.id) }}"
+                                    class="text-decoration-none fw-semibold">
+                                    {{ foto.cliente.nombre }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Sin cliente</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Fecha subida -->
+                        <td>{{ foto.fecha_subida.strftime('%d/%m/%Y %I:%M %p') }}</td>
+
+                        <!-- Eliminar -->
+                        <td>
+                            <form method="POST"
+                                    action="{{ url_for('foto.eliminar_foto', id=foto.id) }}"
+                                    onsubmit="return confirm('¿Eliminar archivo permanentemente?');">
+                                <button class="btn btn-danger btn-sm">🗑 Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="text-center py-4">
+            <h5 class="text-muted">No se han subido fotografías aún.</h5>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

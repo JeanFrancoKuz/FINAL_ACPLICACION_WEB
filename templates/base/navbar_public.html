@@ -21,27 +21,32 @@
                 <li class="nav-item"><a class="nav-link hover-underline" href="#servicios">Servicios</a></li>
                 <li class="nav-item"><a class="nav-link hover-underline" href="#contacto">Contacto</a></li>
 
-                <!-- MOSTRAR BOTÓN LOGIN solo si NO está autenticado -->
                 {% if not current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger px-4 fw-semibold shadow-sm" href="{{ url_for('auth.login') }}">
-                            Ingresar
-                        </a>
-                    </li>
+                <!-- Si NO está logueado -->
+                <li class="nav-item">
+                    <a class="btn btn-danger px-4 fw-semibold shadow-sm" href="{{ url_for('auth.login') }}">
+                        Ingresar
+                    </a>
+                </li>
 
                 {% else %}
-                    <!-- Si está logueado redirige a su dashboard según su rol -->
-                    <li class="nav-item">
-                        <a class="btn btn-warning px-3 fw-semibold shadow-sm" 
-                           href="{{ url_for('cliente.dashboard_cliente') if current_user.rol.nombre=='CLIENTE' else url_for('admin.dashboard') }}">
-                            Panel
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
-                            <button class="btn btn-outline-light fw-semibold">Salir</button>
-                        </form>
-                    </li>
+                <!-- Si está logueado -->
+                <li class="nav-item">
+                    <a class="btn btn-warning px-3 fw-semibold shadow-sm"
+                       href="{% if current_user.rol.nombre=='CLIENTE' %}
+                                {{ url_for('cliente.dashboard_cliente') }}
+                             {% else %}
+                                {{ url_for('admin.dashboard_admin') }}
+                             {% endif %}">
+                        Panel
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
+                        <button class="btn btn-outline-light fw-semibold">Salir</button>
+                    </form>
+                </li>
                 {% endif %}
 
             </ul>
@@ -53,7 +58,6 @@
 <style>
     nav.navbar { backdrop-filter: blur(6px); }
 
-    /* Subrayado animado en hover */
     .hover-underline {
         position: relative;
         transition: color .2s;

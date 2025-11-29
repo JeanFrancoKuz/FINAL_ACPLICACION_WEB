@@ -1,0 +1,26 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Asistencias{% endblock %}
+{% block content %}
+
+<h2 class="fw-bold mb-3">Asistencias registradas</h2>
+
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for a in asistencias %}
+        <tr>
+            <td>{{ a.fecha.strftime('%d-%m-%Y') }}</td>
+            <td>{{ a.hora.strftime('%H:%M') }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="2" class="text-center">Sin asistencias aún</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

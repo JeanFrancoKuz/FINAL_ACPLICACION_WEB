@@ -155,6 +155,7 @@ def crear_cliente():
                 correo=correo or f"{cedula}@local.invalid",
                 cedula=cedula,
                 rol=rol_cliente,
+                primera_vez=True
             )
             nuevo_usuario.set_password(temp_password)
             db.session.add(nuevo_usuario)

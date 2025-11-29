@@ -20,6 +20,7 @@ class Usuario(UserMixin, db.Model):
     cedula = db.Column(db.String(20), nullable=False, index=True)
     password_hash = db.Column(db.String(128), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    primera_vez = db.Column(db.Boolean, default=True, nullable=False)
     last_login = db.Column(db.DateTime, default=None, index=True)
 
     rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False, index=True)
