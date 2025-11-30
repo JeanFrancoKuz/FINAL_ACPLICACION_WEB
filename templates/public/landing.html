@@ -1,7 +1,11 @@
+{% extends "base/layout_public.html" %}
+
+{% block title %}Bienvenido — HITO ALL SPORT{% endblock %}
+
 {% block content %}
 
 <!-- HERO PRINCIPAL -->
-<section class="hero">
+<section class="hero" id="inicio">
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1 class="title-hero fw-bold mb-3">Entrena. Mejora. Supera tus límites.</h1>
@@ -11,6 +15,7 @@
         <a href="{{ url_for('auth.login') }}" class="btn-hero shadow">Ingresar</a>
     </div>
 </section>
+
 
 <!-- SERVICIOS -->
 <section id="servicios">
@@ -42,6 +47,7 @@
     </div>
 </section>
 
+
 <!-- CONTACTO -->
 <section id="contacto">
     <div class="container fadeIn">
@@ -54,10 +60,12 @@
                         <label class="form-label text-white">Nombre</label>
                         <input type="text" class="form-control" placeholder="Tu nombre">
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label text-white">Correo</label>
                         <input type="email" class="form-control" placeholder="nombre@correo.com">
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label text-white">Mensaje</label>
                         <textarea rows="4" class="form-control" placeholder="Escribe tu mensaje..."></textarea>

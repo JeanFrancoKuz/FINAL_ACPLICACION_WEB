@@ -1,3 +1,5 @@
+body { background:magenta !important; }
+
 /* ===========================================================
 🎨 UI SYSTEM — HITO ALL SPORT
 Themes: Dark | Deportivo | Moderno
@@ -35,47 +37,76 @@ body{
 .fadeIn{animation:fadeIn .7s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 
-/* ===========================================================
-🌐 NAVBAR PUBLIC
-=========================================================== */
+/* ===========================================
+   NAV PUBLIC REFINADO
+=========================================== */
+/* ================= NAVBAR MODERNO ================= */
 .nav-public{
-    background:rgba(33,33,33,.88);
-    backdrop-filter:blur(6px);
-    border-bottom:1px solid rgba(255,255,255,.06);
+    background:#0f0f14;
+    backdrop-filter: blur(8px);
+    box-shadow:0 2px 15px rgba(0,0,0,.6);
 }
 
-.nav-public .nav-link{
-    color:var(--white)!important;
-    font-weight:500;
+/* Logo */
+.logo-navbar{
+    height:40px;
+    border-radius:50%;
+    box-shadow:0 0 6px rgba(255,255,255,.3);
+}
+
+/* Nombre marca */
+.brand-name span{
+    font-family:"Poppins", sans-serif;
+    font-size:1.25rem;
+    font-weight:700;
+    color:white;
+    letter-spacing:.5px;
     transition:.3s;
 }
+.brand-name:hover span{
+    color:var(--red);
+    text-shadow:0 0 12px var(--red);
+}
 
-.nav-public .nav-link:hover{
-    color:var(--red)!important;
+/* Links navbar */
+.nav-item-link{
+    color:white !important;
+    font-weight:500;
+    font-size:.95rem;
+    position:relative;
+    padding-bottom:3px;
+    transition:.3s;
+}
+.nav-item-link::after{
+    content:"";
+    width:0%;height:2px;
+    background:var(--red);
+    position:absolute;
+    bottom:0;left:0;
+    transition:.3s;
+}
+.nav-item-link:hover{
+    color:var(--red) !important;
     text-shadow:0 0 10px var(--red);
 }
+.nav-item-link:hover::after{
+    width:100%;
+}
 
-.hover-underline{position:relative;}
-.hover-underline::after{
-    content:"";
-    position:absolute;left:0;bottom:-3px;
-    width:0;height:2px;background:var(--red);
+/* Botón Acceder */
+.btn-access{
+    background:linear-gradient(90deg,#246BFF,#527BFF);
+    padding:8px 22px;
+    border-radius:8px;
+    color:white;
+    font-weight:600;
     transition:.3s;
+    text-decoration:none!important;
 }
-.hover-underline:hover::after{width:100%;}
-
-/* Botones universales */
-.btn-red{
-    background:var(--red)!important;color:var(--white)!important;
-    border-radius:8px;transition:.3s;
+.btn-access:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 18px rgba(63,109,255,.7);
 }
-.btn-red:hover{transform:scale(1.07);box-shadow:0 0 14px var(--red);}
-
-.btn-blue{
-    background:var(--blue)!important;color:var(--white)!important;
-    border-radius:8px;transition:.3s;
-}
-.btn-blue:hover{transform:scale(1.07);box-shadow:0 0 14px var(--blue);}
 
 /* ===========================================================
 🔐 NAVBAR CLIENTE
@@ -236,4 +267,9 @@ body{
 .contact-form .form-control:focus{
     border-color:var(--red)!important;
     box-shadow:0 0 14px var(--red);
+}
+
+/* TEST DE CARGA */
+body{
+    background: #0000ff !important;   /* azul fuerte */
 }
