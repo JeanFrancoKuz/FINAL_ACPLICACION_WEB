@@ -2,6 +2,7 @@
 {% block title %}Iniciar Sesión - HITO ALL SPORT{% endblock %}
 
 {% block content %}
+
 <div class="container py-5 d-flex justify-content-center">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow-lg border-0">
@@ -13,27 +14,26 @@
 
             <div class="card-body">
 
-                <!-- Mensajes Flash -->
+                <!-- 📌 Mensajes Flash -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, msg in messages %}
                     <div class="alert alert-{{ category }} alert-dismissible fade show small" role="alert">
-                        {{ msg }}
+                        {{ msg|safe }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     {% endfor %}
                 {% endif %}
                 {% endwith %}
 
+                <!-- FORMULARIO LOGIN -->
                 <form method="POST" action="{{ url_for('auth.login') }}">
-                    
-                    <!-- Usuario -->
+
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Correo o Cédula</label>
-                        <input type="text" name="usuario" class="form-control" placeholder="ej: correo@hito.com / 12345678" required>
+                        <input type="text" name="usuario" class="form-control" placeholder="ej: correo@gmail.com / 12345678" required>
                     </div>
 
-                    <!-- Contraseña -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Contraseña</label>
                         <input type="password" name="password" class="form-control" placeholder="********" required>
@@ -43,7 +43,9 @@
                         <label class="small">
                             <input type="checkbox" name="remember_me"> Recordarme
                         </label>
-                        <a href="{{ url_for('auth.reset_password_request') }}" class="text-danger small">
+
+                        <!-- 🔥 RUTA YA CORRECTA 🔥 -->
+                        <a href="{{ url_for('auth.recuperar_password') }}" class="text-danger small">
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
@@ -52,9 +54,9 @@
                         Ingresar
                     </button>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

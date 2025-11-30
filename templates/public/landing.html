@@ -1,71 +1,69 @@
-{% extends "base/layout_public.html" %}
-
-{% block title %}Bienvenidos a HITO ALL SPORT{% endblock %}
-
 {% block content %}
 
 <!-- HERO PRINCIPAL -->
 <section class="hero">
+    <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1 class="display-4 fw-bold mb-3">Entrena. Mejora. Supera tus límites.</h1>
-        <p class="lead mb-4">Únete al centro deportivo más completo y lleva tu cuerpo al siguiente nivel.</p>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-danger btn-lg px-5 py-2 fw-semibold shadow">Ingresar</a>
+        <h1 class="title-hero fw-bold mb-3">Entrena. Mejora. Supera tus límites.</h1>
+        <p class="subtitle-hero mb-4">
+            Únete al centro deportivo más completo y lleva tu cuerpo a su mejor versión.
+        </p>
+        <a href="{{ url_for('auth.login') }}" class="btn-hero shadow">Ingresar</a>
     </div>
 </section>
 
-<!-- SECCIÓN SERVICIOS -->
+<!-- SERVICIOS -->
 <section id="servicios">
-    <div class="container">
-        <h2 class="text-center fw-bold mb-4">Nuestros Servicios</h2>
-        <div class="row g-4 mt-3">
+    <div class="container fadeIn">
+        <h2 class="section-title text-center mb-5">Nuestros Servicios</h2>
+
+        <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="fw-bold">Entrenamiento Personalizado</h5>
-                        <p>Rutinas hechas a tu medida para lograr tus objetivos.</p>
-                    </div>
+                <div class="service-card">
+                    <h5 class="fw-bold mb-2">Entrenamiento Personalizado</h5>
+                    <p>Rutinas adaptadas para ganar masa, perder peso o mejorar rendimiento.</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="fw-bold">Planes de Nutrición</h5>
-                        <p>Asesoría profesional para acompañar tu progreso físico.</p>
-                    </div>
+                <div class="service-card">
+                    <h5 class="fw-bold mb-2">Planes de Nutrición</h5>
+                    <p>Asesoría profesional para potenciar tus resultados físicos.</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body text-center">
-                        <h5 class="fw-bold">Clases Grupales</h5>
-                        <p>Entrenamientos dinámicos para mantenerte motivado.</p>
-                    </div>
+                <div class="service-card">
+                    <h5 class="fw-bold mb-2">Clases Grupales</h5>
+                    <p>Ambiente motivador para ganar resistencia con energía de equipo.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- SECCIÓN CONTACTO -->
+<!-- CONTACTO -->
 <section id="contacto">
-    <div class="container">
-        <h2 class="text-center fw-bold mb-4">Contáctanos</h2>
+    <div class="container fadeIn">
+        <h2 class="section-title text-center mb-5">Contáctanos</h2>
+
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <form>
+                <form class="contact-form">
                     <div class="mb-3">
-                        <label class="form-label">Nombre</label>
+                        <label class="form-label text-white">Nombre</label>
                         <input type="text" class="form-control" placeholder="Tu nombre">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Correo</label>
+                        <label class="form-label text-white">Correo</label>
                         <input type="email" class="form-control" placeholder="nombre@correo.com">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Mensaje</label>
-                        <textarea class="form-control" rows="4" placeholder="Escribe tu mensaje..."></textarea>
+                        <label class="form-label text-white">Mensaje</label>
+                        <textarea rows="4" class="form-control" placeholder="Escribe tu mensaje..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger px-4 fw-semibold">Enviar</button>
+
+                    <button type="submit" class="btn-red w-100 py-2 fw-semibold">Enviar</button>
                 </form>
             </div>
         </div>

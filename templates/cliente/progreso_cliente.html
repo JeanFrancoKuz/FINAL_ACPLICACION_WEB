@@ -1,28 +1,51 @@
 {% extends "base/layout_cliente.html" %}
 {% block title %}Mi Progreso{% endblock %}
+
 {% block content %}
 
-<h2 class="fw-bold">Evolución del progreso físico</h2>
+<h2 class="fw-bold mb-4">📈 Historial de Progreso</h2>
 
-<a class="btn btn-success mb-3" href="{{ url_for('cliente.registrar_progreso') }}">
-    Registrar nuevo progreso
-</a>
+<div class="d-flex justify-content-between mb-4">
+    <a class="btn btn-success" href="{{ url_for('progreso.registrar_progreso') }}">
+        ➕ Registrar progreso
+    </a>
+</div>
 
 <div class="row g-4">
 
-{% for p in progreso %}
-<div class="col-md-4">
-    <div class="card bg-dark text-light shadow-sm p-2">
-        <p><strong>Fecha:</strong> {{ p.fecha.strftime('%d-%m-%Y') }}</p>
-        <p>Peso: <strong>{{ p.peso }}kg</strong></p>
+{% for p in progreso|sort(attribute='fecha_registro', reverse=True) %}
 
-        {% if p.foto %}
-            <img src="{{ url_for('static', filename=p.foto) }}" class="img-fluid rounded">
-        {% endif %}
+<div class="col-md-4">
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-light fw-bold text-center">
+            {{ p.fecha_registro.strftime('%d/%m/%Y') }}
+        </div>
+
+        <div class="card-body text-center">
+
+            <p class="m-0">Peso: <b>{{ p.peso }} kg</b></p>
+            <p class="m-0">Altura: <b>{{ p.altura }} m</b></p>
+            <p class="m-0">IMC: <b>{{ p.calcular_imc() }}</b></p>
+
+            <hr>
+
+            {% if p.fotos %}
+                {% for foto in p.fotos %}
+                    <img src="{{ url_for('static', filename=foto.ruta) }}"
+                            class="img-fluid rounded mb-2"
+                            style="height:200px; object-fit:cover">
+                {% endfor %}
+            {% else %}
+                <p class="text-muted small">No hay fotos de este registro</p>
+            {% endif %}
+        </div>
+
     </div>
 </div>
+
 {% else %}
-    <p>No hay registros aún.</p>
+    <p class="text-center">Aún no tienes progreso registrado.</p>
 {% endfor %}
 
 </div>

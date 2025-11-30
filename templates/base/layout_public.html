@@ -3,65 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <!-- SEO y Accesibilidad -->
     <meta name="theme-color" content="#000000">
     <meta name="author" content="HITO ALL SPORT">
     <meta name="description" content="Sistema de control fitness — Pagos, progreso, asistencias y dashboard para clientes del gimnasio.">
-
     <title>{% block title %}HITO ALL SPORT{% endblock %}</title>
-
-    <!-- Bootstrap -->
+    <!-- CSS en orden correcto -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-
-    <!-- Animaciones opcionales y estilos globales -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        /* Mejores espacios visuales */
-        main {
-            min-height: 75vh;
-            padding-top: 30px;
-        }
-
-        /* Alertas más visibles */
-        .flash-container {
-            position: sticky;
-            top: 10px;
-            z-index: 2000;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- nuestro theme oscuro -->
 </head>
-
-<body class="bg-light text-dark">
-
+<!--🔥 modo oscuro habilitado + animación -->
+<body class="app-dark fadeIn">
     <!-- NAVBAR Público -->
     {% include "base/navbar_public.html" %}
-
-    <!-- ⚠ Notificaciones Flash globales -->
-    <div class="container mt-3 flash-container">
+    <!-- Flash mensajes -->
+    <div class="container mt-4 flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, msg in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm">
-                        {{ msg }}
-                        <button class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+            {% for category, msg in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm">
+                {{ msg }}
+                <button class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
-
-    <!-- Contenido principal -->
-    <main class="container">
+    <!-- Contenido principal full-width (hero necesita esto) -->
+    <main class="content-wrap">
         {% block content %}{% endblock %}
     </main>
-
-    <!-- Footer -->
+    <!-- FOOTER -->
     {% include "base/footer_public.html" %}
-
-    <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-
 </body>
 </html>

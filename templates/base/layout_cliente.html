@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>{% block title %}Panel del Cliente{% endblock %}</title>
-
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
-
-
+    <!-- Estilos Globales -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
 </head>
-<body>
-
+<body class="app-dark fadeIn"><!-- ⛔ antes faltaba animación + fondo -->
     {% include 'base/navbar_cliente.html' %}
-
-    <main class="container container-main mt-3 pb-5">
+    <!-- Main con espacio para navbar fijo -->
+    <main class="container cliente-main pt-5 mt-4 pb-5"><!-- 👈 margen visual agregado -->
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    <div class="alert alert-{{ category }} alert-dismissible fade show glow-alert" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>

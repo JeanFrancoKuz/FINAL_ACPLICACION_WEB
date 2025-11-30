@@ -1,78 +1,59 @@
 <!-- Navbar Pública - HITO ALL SPORT -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm fixed-top">
+<nav class="navbar navbar-expand-lg nav-public fixed-top py-3">
     <div class="container d-flex align-items-center">
 
-        <!-- LOGOTIPO -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+        <!-- LOGO / BRAND -->
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{{ url_for('index') }}">
             <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="HITO ALL SPORT" height="42">
-            <span class="fw-bold fs-5 tracking-wide">HITO ALL SPORT</span>
+            <span class="fs-5">HITO ALL SPORT</span>
         </a>
 
-        <!-- Toggle Responsive -->
+        <!-- TOGGLE -->
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublico">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Menú -->
+        <!-- MENU -->
         <div class="collapse navbar-collapse" id="navbarPublico">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4">
 
-                <li class="nav-item"><a class="nav-link hover-underline" href="/">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link hover-underline" href="#inicio">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link hover-underline" href="#servicios">Servicios</a></li>
                 <li class="nav-item"><a class="nav-link hover-underline" href="#contacto">Contacto</a></li>
 
                 {% if not current_user.is_authenticated %}
-                <!-- Si NO está logueado -->
+
+                <!-- 🔴 BOTÓN INGRESAR CUANDO NO HAY SESIÓN -->
                 <li class="nav-item">
-                    <a class="btn btn-danger px-4 fw-semibold shadow-sm" href="{{ url_for('auth.login') }}">
+                    <a class="btn-red px-4 fw-semibold" href="{{ url_for('auth.login') }}">
                         Ingresar
                     </a>
                 </li>
 
                 {% else %}
-                <!-- Si está logueado -->
+
+                <!-- 🟢 BOTÓN PANEL SEGÚN ROL -->
                 <li class="nav-item">
-                    <a class="btn btn-warning px-3 fw-semibold shadow-sm"
-                       href="{% if current_user.rol.nombre=='CLIENTE' %}
+                    <a class="btn-blue px-4 fw-semibold"
+                        href="{% if current_user.rol.nombre=='CLIENTE' %}
                                 {{ url_for('cliente.dashboard_cliente') }}
-                             {% else %}
+                            {% else %}
                                 {{ url_for('admin.dashboard_admin') }}
-                             {% endif %}">
+                            {% endif %}">
                         Panel
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
-                        <button class="btn btn-outline-light fw-semibold">Salir</button>
+                        <button class="btn-red-soft px-3 fw-bold ms-lg-2">Salir</button>
                     </form>
                 </li>
-                {% endif %}
 
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- Estilos personalizados -->
-<style>
-    nav.navbar { backdrop-filter: blur(6px); }
 
-    .hover-underline {
-        position: relative;
-        transition: color .2s;
-    }
-    .hover-underline::after {
-        content:"";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: #dc3545;
-        transition: .3s;
-    }
-    .hover-underline:hover::after {
-        width: 100%;
-    }
-</style>

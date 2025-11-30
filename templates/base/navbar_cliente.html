@@ -1,70 +1,47 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top border-bottom">
+<!-- Navbar Cliente - HITO ALL SPORT -->
+<nav class="navbar navbar-expand-lg navbar-cliente fixed-top py-3">
     <div class="container">
-
         <!-- LOGO -->
-        <a class="navbar-brand fw-bold text-uppercase d-flex align-items-center gap-2"
-           href="{{ url_for('cliente.dashboard_cliente') }}">
-            🏋 HITO Cliente
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
+            href="{{ url_for('cliente.dashboard_cliente') }}">
+            🏋 HITO CLIENTE
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuCliente">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#menuCliente">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="menuCliente">
-            <ul class="navbar-nav ms-auto gap-lg-3">
-
+            <ul class="navbar-nav ms-auto gap-lg-4">
                 <li class="nav-item">
-                    <a class="nav-link {% if 'dashboard_cliente' in request.endpoint %}active{% endif %}"
-                       href="{{ url_for('cliente.dashboard_cliente') }}">
+                    <a class="nav-link hover-underline {% if 'dashboard_cliente' in request.endpoint %}active-cliente{% endif %}"
+                        href="{{ url_for('cliente.dashboard_cliente') }}">
                         📊 Dashboard
                     </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link {% if 'detalles_cliente' in request.endpoint %}active{% endif %}"
-                       href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
+                    <a class="nav-link hover-underline {% if 'detalles_cliente' in request.endpoint %}active-cliente{% endif %}"
+                        href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
                         👤 Mi Perfil
                     </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link {% if 'registrar_pago_cliente' in request.endpoint %}active{% endif %}"
-                       href="{{ url_for('cliente.registrar_pago_cliente') }}">
+                    <a class="nav-link hover-underline {% if 'registrar_pago_cliente' in request.endpoint %}active-cliente{% endif %}"
+                        href="{{ url_for('cliente.registrar_pago_cliente') }}">
                         💳 Registrar Pago
                     </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link {% if 'progreso' in request.endpoint %}active{% endif %}"
-                       href="{{ url_for('progreso.historial_progreso') }}">
+                    <a class="nav-link hover-underline {% if 'progreso' in request.endpoint %}active-cliente{% endif %}"
+                        href="{{ url_for('progreso.historial_progreso') }}">
                         📈 Mi Progreso
                     </a>
                 </li>
-
                 <li class="nav-item">
                     <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
-                        <button class="btn btn-outline-danger btn-sm px-3">⛔ Salir</button>
+                        <button class="btn-logout px-3 fw-bold">⛔ Salir</button>
                     </form>
                 </li>
-
             </ul>
         </div>
     </div>
 </nav>
-
-<style>
-    .navbar .nav-link {
-        font-weight: 500;
-        transition: .3s;
-    }
-    .navbar .nav-link:hover {
-        color: #ff9800 !important;
-    }
-    .navbar .active {
-        color: #ff9800 !important;
-        border-bottom: 2px solid #ff9800;
-        padding-bottom: 3px;
-        font-weight: 600;
-    }
-</style>

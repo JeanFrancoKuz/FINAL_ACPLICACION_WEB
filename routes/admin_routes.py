@@ -176,17 +176,26 @@ def crear_cliente():
             db.session.commit()
 
             flash(
-                f"Cliente registrado correctamente. Membresía activa hasta {nuevo_cliente.membresia_vencimiento.strftime('%d-%m-%Y')}.",
-                "success",
-            )
-            print(f"[DEBUG] Usuario creado: {nuevo_usuario.correo} / pass temporal: {temp_password}")
+                    f"Cliente creado ✔ | Usuario: <b>{nuevo_usuario.correo}</b> | Contraseña temporal: "
+                    f"<b style='color:#ffeb3b'>{temp_password}</b><br>"
+                    f"⚠ Recomienda al cliente cambiarla al iniciar sesión.",
+                    "info"
+                )
+
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error al crear cliente/usuario: {str(e)}", "danger")
             return redirect(url_for("admin.crear_cliente"))
 
-        return redirect(url_for("admin.lista_clientes"))
+        db.session.commit()
+
+        #  ➜ MOSTRAR CREDENCIALES VISUALMENTE
+        return render_template("admin/credenciales_generadas.html",
+                        usuario=nuevo_usuario.correo,
+                        password=temp_password,
+                        vence=nuevo_cliente.membresia_vencimiento.strftime('%d-%m-%Y'))
+
 
     hoy = date.today().strftime("%d-%m-%Y")
     vence = (date.today() + timedelta(days=30)).strftime("%d-%m-%Y")
@@ -274,6 +283,8 @@ def eliminar_cliente(id):
 # ---------------------------------------------------
 # Validar comprobante (muy básico)
 # ---------------------------------------------------
+from datetime import timedelta
+
 @admin_bp.route("/validar_comprobante/<int:id>", methods=["POST"])
 @login_required
 @roles_required("ADMIN")
@@ -282,13 +293,25 @@ def validar_comprobante(id):
     accion = request.form.get("accion")
 
     if accion == "aprobar":
+
+        # Activar estado de membresía
         cliente.estado_membresia = EstadoMembresia.ACTIVO
-        flash("Comprobante aprobado. Cliente activado.", "success")
+
+        # Si no tiene fecha o ya venció → la activamos por un mes desde hoy
+        if not cliente.membresia_vencimiento or cliente.membresia_vencimiento < date.today():
+            cliente.membresia_vencimiento = date.today() + timedelta(days=30)
+        else:
+            # Si el cliente aún tiene días activos → se le suma otro mes
+            cliente.membresia_vencimiento += timedelta(days=30)
+
+        flash("Membresía renovada +1 mes ✔", "success")
+
     elif accion == "rechazar":
         cliente.estado_membresia = EstadoMembresia.INACTIVO
-        flash("Comprobante rechazado. Cliente marcado como inactivo.", "warning")
+        flash("Comprobante rechazado. El cliente queda inactivo.", "warning")
+
     else:
-        flash("Acción no reconocida.", "danger")
+        flash("Acción no válida.", "danger")
 
     try:
         db.session.commit()

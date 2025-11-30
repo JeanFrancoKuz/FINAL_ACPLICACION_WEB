@@ -1,0 +1,239 @@
+/* ===========================================================
+🎨 UI SYSTEM — HITO ALL SPORT
+Themes: Dark | Deportivo | Moderno
+Dev: Jean Franco Kuzniar && ChatGPT Architect🔥
+=========================================================== */
+
+/* 🔥 VARIABLES */
+:root{
+    --dark:#212121;
+    --panel:#2a2a2a;
+    --panel-soft:#1b1b1b;
+    --red:#D62828;
+    --blue:#032549;
+    --white:#ffffff;
+}
+
+/* ===========================================================
+🔥 BASE GLOBAL
+=========================================================== */
+body{
+    font-family:"Poppins",sans-serif;
+    background:var(--dark);
+    color:var(--white);
+    margin:0;
+    scroll-behavior:smooth;
+}
+/* Corrige layout público para que landing sea full-screen */
+.content-wrap{
+    padding-top:80px;    /* espacio por la navbar */
+    width:100%;
+    overflow-x:hidden;
+}
+
+
+.fadeIn{animation:fadeIn .7s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ===========================================================
+🌐 NAVBAR PUBLIC
+=========================================================== */
+.nav-public{
+    background:rgba(33,33,33,.88);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.nav-public .nav-link{
+    color:var(--white)!important;
+    font-weight:500;
+    transition:.3s;
+}
+
+.nav-public .nav-link:hover{
+    color:var(--red)!important;
+    text-shadow:0 0 10px var(--red);
+}
+
+.hover-underline{position:relative;}
+.hover-underline::after{
+    content:"";
+    position:absolute;left:0;bottom:-3px;
+    width:0;height:2px;background:var(--red);
+    transition:.3s;
+}
+.hover-underline:hover::after{width:100%;}
+
+/* Botones universales */
+.btn-red{
+    background:var(--red)!important;color:var(--white)!important;
+    border-radius:8px;transition:.3s;
+}
+.btn-red:hover{transform:scale(1.07);box-shadow:0 0 14px var(--red);}
+
+.btn-blue{
+    background:var(--blue)!important;color:var(--white)!important;
+    border-radius:8px;transition:.3s;
+}
+.btn-blue:hover{transform:scale(1.07);box-shadow:0 0 14px var(--blue);}
+
+/* ===========================================================
+🔐 NAVBAR CLIENTE
+=========================================================== */
+.navbar-cliente{
+    background:rgba(33,33,33,.95);
+    backdrop-filter:blur(5px);
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.navbar-cliente .nav-link{
+    color:var(--white)!important;font-weight:500;transition:.3s;
+}
+.navbar-cliente .nav-link:hover{
+    color:var(--red)!important;
+    text-shadow:0 0 12px var(--red);
+}
+
+.active-cliente{
+    color:var(--red)!important;
+    font-weight:700!important;
+    text-shadow:0 0 14px var(--red);
+}
+
+.btn-logout{
+    background:transparent;border:1px solid var(--red);
+    color:white;border-radius:8px;transition:.3s;
+}
+.btn-logout:hover{
+    background:var(--red)!important;
+    box-shadow:0 0 14px var(--red);
+    transform:scale(1.07);
+}
+
+/* ===========================================================
+🏢 NAVBAR ADMIN
+=========================================================== */
+.navbar-admin{
+    background:rgba(33,33,33,.95);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.navbar-admin .navbar-brand{
+    color:white!important;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+.navbar-admin .navbar-brand:hover{text-shadow:0 0 10px var(--red);}
+
+.navbar-admin .nav-link{
+    color:white!important;font-weight:500;transition:.3s;
+}
+.navbar-admin .nav-link:hover{
+    color:var(--red)!important;text-shadow:0 0 12px var(--red);
+}
+
+.active-admin{
+    color:var(--red)!important;
+    font-weight:700!important;
+    text-shadow:0 0 14px var(--red);
+}
+
+.btn-logout-admin{
+    background:transparent;border:1px solid var(--red);
+    color:white;border-radius:8px;transition:.3s;
+}
+.btn-logout-admin:hover{
+    background:var(--red);
+    box-shadow:0 0 14px var(--red);
+    transform:scale(1.07);
+}
+
+/* ===========================================================
+🦶 FOOTERS (Public / Cliente / Admin)
+=========================================================== */
+.footer-public,.footer-dashboard,.footer-cliente{
+    background:var(--dark);
+    border-top:1px solid rgba(255,255,255,.06);
+    padding:15px 0;text-align:center;
+}
+
+.footer-cliente .text-red,
+.footer-dashboard .glow-red{
+    color:var(--red);
+    text-shadow:0 0 10px rgba(214,40,40,.7);
+}
+
+/* ===========================================================
+🔐 LOGIN / RESET / FIRST-ACCESS
+=========================================================== */
+.login-card,.recuperar-card,.reset-card,.password-card{
+    background:var(--panel);
+    border-radius:14px;padding:25px;
+    box-shadow:0 0 18px rgba(0,0,0,.45);
+}
+
+.input-dark{
+    background:var(--panel-soft);
+    border:1px solid rgba(255,255,255,.15);
+    color:white;transition:.3s;
+}
+.input-dark:focus{
+    border-color:var(--red)!important;
+    box-shadow:0 0 14px var(--red);
+    outline:none;
+}
+
+/* ===========================================================
+🏋 LANDING (Hero / Servicios / Contacto)
+=========================================================== */
+.hero{
+    height:85vh;
+    position:relative;
+    background:url('../img/landing/hero.jpg') center/cover no-repeat;
+}
+.hero-overlay{
+    position:absolute;inset:0;
+    background:rgba(0,0,0,.65);
+    backdrop-filter:blur(2px);
+}
+.hero-content{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:90%;text-align:center;
+    color:white;animation:fadeIn 1.3s ease;
+}
+.title-hero{font-size:2.8rem;text-shadow:0 0 15px rgba(255,255,255,.35);}
+.subtitle-hero{opacity:.9;font-size:1.15rem;}
+
+.btn-hero{
+    background:var(--red);color:white;
+    padding:10px 45px;border-radius:10px;
+    font-size:1.15rem;font-weight:bold;
+    transition:.3s;
+}
+.btn-hero:hover{
+    transform:scale(1.09);
+    box-shadow:0 0 18px var(--red);
+}
+
+#servicios{padding:4rem 0;background:#1c1c1c;}
+.service-card{
+    background:#262626;border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;text-align:center;
+    padding:25px;transition:.35s;
+}
+.service-card:hover{
+    transform:translateY(-6px) scale(1.04);
+    box-shadow:0 0 22px var(--red);
+}
+
+#contacto{padding:4rem 0;background:#111;}
+.contact-form .form-control{
+    background:#0d0d0d;border:1px solid rgba(255,255,255,.18);
+    color:white;transition:.3s;
+}
+.contact-form .form-control:focus{
+    border-color:var(--red)!important;
+    box-shadow:0 0 14px var(--red);
+}

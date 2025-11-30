@@ -1,75 +1,69 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
-    
-    <!-- LOGO -->
-    <a class="navbar-brand fw-bold text-uppercase d-flex align-items-center gap-2" 
-        href="{{ url_for('admin.dashboard_admin') }}">
-        <span>🏋️‍♂️ HITO Admin</span>
-    </a>
+<!-- ▓▓ NAVBAR ADMIN - HITO ALL SPORT ▓▓ -->
+<nav class="navbar navbar-expand-lg navbar-admin px-4 fixed-top py-3 shadow-sm">
+    <div class="container-fluid">
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        <!-- LOGO -->
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold"
+            href="{{ url_for('admin.dashboard_admin') }}">
+            🏋️‍♂️ HITO ADMIN
+        </a>
 
-    <div class="collapse navbar-collapse" id="navbarAdmin">
+        <!-- TOGGLE MOVIL -->
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <!-- 📂 SECCIONES -->
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- MENU -->
+        <div class="collapse navbar-collapse" id="navbarAdmin">
 
-            <li class="nav-item">
-                <a class="nav-link {% if 'dashboard_admin' in request.endpoint %}active fw-bold text-warning{% endif %}"
-                    href="{{ url_for('admin.dashboard_admin') }}">
-                    📊 Dashboard
-                </a>
-            </li>
+            <!-- SECCIONES -->
+            <ul class="navbar-nav me-auto gap-2 gap-lg-4 pt-3 pt-lg-0">
 
-            <li class="nav-item">
-                <a class="nav-link {% if 'lista_clientes' in request.endpoint %}active fw-bold text-warning{% endif %}"
-                    href="{{ url_for('admin.lista_clientes') }}">
-                    👥 Clientes
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline {% if 'dashboard_admin' in request.endpoint %}active-admin{% endif %}"
+                        href="{{ url_for('admin.dashboard_admin') }}">
+                        📊 Dashboard
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link {% if 'pago.' in request.endpoint %}active fw-bold text-warning{% endif %}"
-                    href="{{ url_for('pago.lista_pagos') }}">
-                    💳 Pagos
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline {% if 'lista_clientes' in request.endpoint %}active-admin{% endif %}"
+                        href="{{ url_for('admin.lista_clientes') }}">
+                        👥 Clientes
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link {% if 'asistencia.' in request.endpoint %}active fw-bold text-warning{% endif %}"
-                    href="{{ url_for('asistencia.lista_asistencias') }}">
-                    📅 Asistencias
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline {% if 'pago.' in request.endpoint %}active-admin{% endif %}"
+                        href="{{ url_for('pago.lista_pagos') }}">
+                        💳 Pagos
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link {% if 'reportes.' in request.endpoint %}active fw-bold text-warning{% endif %}"
-                    href="{{ url_for('reportes.reporte_general') }}">
-                    📑 Reportes
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline {% if 'asistencia.' in request.endpoint %}active-admin{% endif %}"
+                        href="{{ url_for('asistencia.lista_asistencias') }}">
+                        📅 Asistencias
+                    </a>
+                </li>
 
-        </ul>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline {% if 'reportes.' in request.endpoint %}active-admin{% endif %}"
+                        href="{{ url_for('reportes.reporte_general') }}">
+                        📑 Reportes
+                    </a>
+                </li>
 
-        <!-- 🔐 USUARIO Y SALIDA -->
-        <div class="d-flex align-items-center gap-3">
+            </ul>
 
-            <span class="text-white-50 small">👤 {{ current_user.nombre }}</span>
+            <!-- USUARIO + LOGOUT -->
+            <div class="d-flex align-items-center gap-3 pt-3 pt-lg-0">
+                <span class="user-name fw-semibold text-white">👤 {{ current_user.nombre }}</span>
+                <form action="{{ url_for('auth.logout') }}" method="POST">
+                    <button class="btn-logout-admin px-3 fw-bold">🚪 Salir</button>
+                </form>
+            </div>
 
-            <form action="{{ url_for('auth.logout') }}" method="POST">
-                <button class="btn btn-outline-danger btn-sm px-3">
-                    🚪 Salir
-                </button>
-            </form>
         </div>
     </div>
 </nav>
-
-<style>
-    .navbar .nav-link:hover { color: #ffc107 !important; }
-    .navbar .active {
-        border-bottom: 2px solid #ffc107;
-        padding-bottom: 4px;
-    }
-</style>

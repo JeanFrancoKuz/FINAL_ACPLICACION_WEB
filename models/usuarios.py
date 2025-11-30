@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,16 +23,22 @@ class Usuario(UserMixin, db.Model):
     primera_vez = db.Column(db.Boolean, default=True, nullable=False)
     last_login = db.Column(db.DateTime, default=None, index=True)
 
+    # 🔥 Campos añadidos para recuperación segura
+    reset_token = db.Column(db.String(255), unique=True, nullable=True)
+    reset_expira = db.Column(db.DateTime, nullable=True)
+
     rol_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False, index=True)
     rol = db.relationship("Rol", back_populates="usuarios")
 
     cliente = db.relationship("Cliente", back_populates="usuario", uselist=False)
 
-    fotos = db.relationship("Foto",
+    fotos = db.relationship(
+        "Foto",
         back_populates="usuario",
         cascade="all, delete-orphan",
         lazy="select"
     )
+
 
     # --------------------------- Validaciones
     @validates("correo")
@@ -45,9 +51,10 @@ class Usuario(UserMixin, db.Model):
     def validate_cedula(self, key, value):
         if not value or not value.isdigit():
             raise ValueError("La cédula debe contener solo números")
-        if len(value) > 20:
+        if len(value) >20:
             raise ValueError("Cédula excede el máximo permitido (20)")
         return value
+
 
     # --------------------------- Seguridad
     def set_password(self, pwd):
@@ -59,10 +66,29 @@ class Usuario(UserMixin, db.Model):
         return check_password_hash(self.password_hash, pwd)
 
     @property
-    def password(self):  # No se puede leer directamente
-        raise AttributeError("Acceso no permitido.")
+    def password(self):
+        raise AttributeError("La contraseña no se puede visualizar.")
 
-    # --------------------------- Helpers Útiles
+
+    # --------------------------- Recuperación de contraseña
+    def generar_token_recuperacion(self):
+        """Genera token y lo almacena con expiración de 30 min."""
+        import secrets
+        token = secrets.token_urlsafe(32)
+        self.reset_token = token
+        self.reset_expira = datetime.utcnow() + timedelta(minutes=30)
+        return token
+
+    def token_valido(self, token):
+        """Confirma que el token pertenece al usuario y no expiró."""
+        return (
+            self.reset_token == token 
+            and self.reset_expira 
+            and self.reset_expira > datetime.utcnow()
+        )
+
+
+    # --------------------------- Helpers
     def marcar_login(self):
         self.last_login = datetime.utcnow()
         db.session.commit()
@@ -80,4 +106,3 @@ class Usuario(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<Usuario {self.id} | {self.correo} | rol={self.rol.nombre}>"
-

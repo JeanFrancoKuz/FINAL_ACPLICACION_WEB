@@ -1,4 +1,17 @@
-<footer>
-    <p class="m-0 small">© {{ current_year }} HITO ALL SPORT</p>
-    <p class="m-0 small">Panel exclusivo para clientes registrados</p>
+<footer class="footer-cliente text-center py-3 mt-5 fadeIn">
+
+    <p class="m-0 small">
+        © {{ current_year if current_year else "" }} HITO ALL SPORT
+    </p>
+
+    <p class="m-0 small text-red fw-bold">
+        Panel exclusivo para clientes registrados
+    </p>
+
 </footer>
+
+<!-- Si current_year no se está enviando desde Flask -->
+<script>
+    document.currentScript.previousElementSibling.querySelector("p").innerHTML =
+        `© ${new Date().getFullYear()} HITO ALL SPORT`;
+</script>
