@@ -188,8 +188,6 @@ def crear_cliente():
             flash(f"Error al crear cliente/usuario: {str(e)}", "danger")
             return redirect(url_for("admin.crear_cliente"))
 
-        db.session.commit()
-
         #  ➜ MOSTRAR CREDENCIALES VISUALMENTE
         return render_template("admin/credenciales_generadas.html",
                         usuario=nuevo_usuario.correo,

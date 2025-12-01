@@ -7,75 +7,101 @@
 <!-- HERO PRINCIPAL -->
 <section class="hero" id="inicio">
     <div class="hero-overlay"></div>
+
     <div class="hero-content">
-        <h1 class="title-hero fw-bold mb-3">Entrena. Mejora. Supera tus límites.</h1>
-        <p class="subtitle-hero mb-4">
-            Únete al centro deportivo más completo y lleva tu cuerpo a su mejor versión.
+        <h1 class="title-hero">Entrena. Mejora. Supera tus límites.</h1>
+        <p class="subtitle-hero">
+            Centro deportivo moderno con tecnología, progreso físico, asistencia y control de pagos.
         </p>
-        <a href="{{ url_for('auth.login') }}" class="btn-hero shadow">Ingresar</a>
+        <a href="{{ url_for('auth.login') }}" class="btn-hero">Ingresar</a>
     </div>
 </section>
 
 
-<!-- SERVICIOS -->
+
+<!-- 🏋 SERVICIOS -->
 <section id="servicios">
-    <div class="container fadeIn">
-        <h2 class="section-title text-center mb-5">Nuestros Servicios</h2>
+    <h2 class="section-title">Nuestros Servicios</h2>
 
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="service-card">
-                    <h5 class="fw-bold mb-2">Entrenamiento Personalizado</h5>
-                    <p>Rutinas adaptadas para ganar masa, perder peso o mejorar rendimiento.</p>
-                </div>
-            </div>
+    <div class="servicios-grid">
 
-            <div class="col-md-4">
-                <div class="service-card">
-                    <h5 class="fw-bold mb-2">Planes de Nutrición</h5>
-                    <p>Asesoría profesional para potenciar tus resultados físicos.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="service-card">
-                    <h5 class="fw-bold mb-2">Clases Grupales</h5>
-                    <p>Ambiente motivador para ganar resistencia con energía de equipo.</p>
-                </div>
-            </div>
+        <div class="service-card">
+            <h4>Entrenamiento Personalizado</h4>
+            <p>Plan adaptado a tus objetivos como aumento de muscular, rendimiento o definición.</p>
         </div>
+
+        <div class="service-card">
+            <h4>Planes de Nutrición</h4>
+            <p>Guía alimenticia profesional para potenciar tu transformación física.</p>
+        </div>
+
+        <div class="service-card">
+            <h4>Clases Grupales</h4>
+            <p>Motivación colectiva para aumentar energía, resistencia y disciplina.</p>
+        </div>
+
+        <!-- NUEVO SERVICIO -->
+        <div class="service-card special">
+            <h4>Zonas Especiales</h4>
+            <p>Relájate y recupera tu cuerpo con áreas de <b>Sauna y vapor</b>.</p>
+        </div>
+
     </div>
 </section>
 
 
-<!-- CONTACTO -->
-<section id="contacto">
-    <div class="container fadeIn">
-        <h2 class="section-title text-center mb-5">Contáctanos</h2>
+<!-- =========================================
+    SECCIÓN QUIÉNES SOMOS + CONTACTO DUAL
+========================================= -->
+<section id="info-gym" class="fadeIn">
 
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <form class="contact-form">
-                    <div class="mb-3">
-                        <label class="form-label text-white">Nombre</label>
-                        <input type="text" class="form-control" placeholder="Tu nombre">
-                    </div>
+    <div class="info-container">
 
-                    <div class="mb-3">
-                        <label class="form-label text-white">Correo</label>
-                        <input type="email" class="form-control" placeholder="nombre@correo.com">
-                    </div>
+        <!-- 🟥 QUIÉNES SOMOS CARD -->
+        <div class="info-card">
+            <h2 class="card-title">Quiénes Somos</h2>
+            <p>
+                Hito All Sports es un centro de acondicionamiento físico ubicado en el
+                Centro Comercial El Hito, Los Teques, Estado Miranda. Nos enfocamos en
+                promover salud, bienestar y disciplina a través del entrenamiento físico.
+            </p>
 
-                    <div class="mb-3">
-                        <label class="form-label text-white">Mensaje</label>
-                        <textarea rows="4" class="form-control" placeholder="Escribe tu mensaje..."></textarea>
-                    </div>
+            <p class="sub-info">Misión</p>
+            <p>
+                Brindar un espacio profesional y accesible donde cada persona pueda mejorar
+                su calidad de vida mediante la actividad física, con entrenamientos guiados
+                y un ambiente óptimo para el desarrollo corporal.
+            </p>
 
-                    <button type="submit" class="btn-red w-100 py-2 fw-semibold">Enviar</button>
-                </form>
-            </div>
+            <p class="sub-info">Visión</p>
+            <p>
+                Ser un gimnasio líder en la región, reconocido por la excelencia de sus
+                servicios y el uso de tecnologías que optimicen la experiencia del cliente.
+            </p>
+
+            <p class="sub-info">Objetivos</p>
+            <ul class="lista-info">
+                <li>Ofrecer entrenamientos adaptados a cada deportista.</li>
+                <li>Garantizar un ambiente seguro y motivador.</li>
+                <li>Promover hábitos de vida activa y saludable.</li>
+            </ul>
         </div>
+
+        <!-- 🟦 CONTACTO FORM -->
+        <div class="info-card form-side">
+            <h2 class="card-title">Contáctanos</h2>
+
+            <form class="contact-form">
+                <input type="text" placeholder="Tu nombre">
+                <input type="email" placeholder="Correo electrónico">
+                <textarea rows="4" placeholder="Tu mensaje..."></textarea>
+                <button class="btn-red" type="submit">Enviar</button>
+            </form>
+        </div>
+
     </div>
+
 </section>
+
 
 {% endblock %}

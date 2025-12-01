@@ -1,30 +1,32 @@
-<!-- Footer Público - HITO ALL SPORT -->
-<footer class="footer-public bg-dark text-white mt-5 pt-4 pb-3">
-    <div class="container text-center">
+<footer class="footer-public">
 
-        <!-- Marca -->
-        <h5 class="fw-bold mb-1">HITO ALL SPORT</h5>
-        <p class="text-light fst-italic">Centro de entrenamiento y bienestar físico.</p>
+    <div class="footer-grid">
 
-        <!-- Navegación legal -->
-        <nav class="mt-3">
-            <a href="#" class="footer-link">Términos y condiciones</a>
-            <span class="mx-1 text-secondary">•</span>
-            <a href="#" class="footer-link">Política de privacidad</a>
-        </nav>
+        <!-- Redes -->
+        <div>
+            <h4 class="footer-title">Síguenos</h4>
+            <a href="https://www.instagram.com/hitoallsports?igsh=dm1sbnd3dHd4bWwx" target="_blank" class="footer-link">@hitoallsports</a>
+        </div>
 
-        <hr class="border-secondary" style="width:60%; margin:auto; opacity:0.4;">
+        <!-- Contacto -->
+        <div>
+            <h4 class="footer-title">Contacto</h4>
+            <p class="footer-text">📞 +58 422-3232212</p>
+            <p class="footer-text">📧 hitoallsport@gmail.com</p>
+        </div>
 
-        <!-- Derechos -->
-        <small class="text-secondary d-block mt-3">
-            &copy; <span id="year"></span> HITO ALL SPORT — Todos los derechos reservados.
-        </small>
+        <!-- Dirección -->
+        <div>
+            <h4 class="footer-title">Ubicación</h4>
+            <p class="footer-text">Av. Bermúdez, CC Hito, Piso 7, Local 1</p>
+            <p class="footer-text">Los Teques 1201</p>
+        </div>
 
     </div>
+
+    <hr class="footer-divider">
+    <p class="copy">© <span id="year"></span> HITO ALL SPORT — Todos los derechos reservados.</p>
+
 </footer>
 
-<!-- Script para año automático -->
-<script>
-    document.getElementById("year").innerText = new Date().getFullYear();
-</script>
-
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>

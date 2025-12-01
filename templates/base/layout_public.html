@@ -3,39 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SEO y Accesibilidad -->
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#000">
     <meta name="author" content="HITO ALL SPORT">
-    <meta name="description" content="Sistema de control fitness — Pagos, progreso, asistencias y dashboard para clientes del gimnasio.">
+    <meta name="description" content="Sistema control integral — pagos, progreso, asistencias.">
     <title>{% block title %}HITO ALL SPORT{% endblock %}</title>
-    <!-- CSS en orden correcto -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- nuestro theme oscuro -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
-<!--🔥 modo oscuro habilitado + animación -->
-<body class="app-dark fadeIn">
-    <!-- NAVBAR Público -->
-    {% include "base/navbar_public.html" %}
-    <!-- Flash mensajes -->
-    <div class="container mt-4 flash-container">
+    <body class="{% block body_class %}{% endblock %}">
+        {% include "base/navbar_public.html" %}
+        <!-- ⚡ FLASH — SOLO SE MUESTRA SI EXISTE -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
+        <div class="flash-container">
             {% for category, msg in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm">
-                {{ msg }}
-                <button class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="flash-box {{ category }}">
+                <div class="flash-box-text">{{ msg|safe }}</div>
+                <button type="button" class="flash-copy-btn">Copiar enlace</button>
             </div>
             {% endfor %}
+        </div>
         {% endif %}
         {% endwith %}
-    </div>
-    <!-- Contenido principal full-width (hero necesita esto) -->
-    <main class="content-wrap">
-        {% block content %}{% endblock %}
-    </main>
-    <!-- FOOTER -->
-    {% include "base/footer_public.html" %}
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-</body>
+        <!-- CONTENIDO PRINCIPAL -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        {% include "base/footer_public.html" %}
+    <!-- ==============================
+        JS GLOBAL
+    ============================== -->
+    <script>
+    /* MENU NAV */
+    const toggle = document.getElementById("nav-toggle");
+    const menu   = document.getElementById("nav-links");
+    toggle?.addEventListener("click",()=>menu.classList.toggle("open"));
+    document.querySelectorAll("#nav-links a")
+        .forEach(a=>a.addEventListener("click",()=>menu.classList.remove("open")));
+    /* ======================
+    FLASH COPY BUTTON
+    ====================== */
+    document.querySelectorAll(".flash-box").forEach(box=>{
+        const btn  = box.querySelector(".flash-copy-btn");
+        const link = box.querySelector("a");
+
+        if(!link){ btn?.remove(); return; } // Si no hay link, no mostrar botón
+
+        btn.onclick = async()=>{
+            await navigator.clipboard.writeText(link.href);
+            btn.innerText = "✔ Copiado";
+            btn.classList.add("copied");
+            setTimeout(()=>{ 
+                btn.innerText="Copiar enlace"; 
+                btn.classList.remove("copied");
+            },2000);
+        }
+    });
+    </script>
+
+    </body>
 </html>

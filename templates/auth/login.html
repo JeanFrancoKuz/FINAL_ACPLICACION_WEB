@@ -1,62 +1,26 @@
 {% extends 'base/layout_public.html' %}
 {% block title %}Iniciar Sesión - HITO ALL SPORT{% endblock %}
-
+{% block body_class %}auth-bg{% endblock %}
+{% block auth_page %}LOGIN AUTH{% endblock %}
 {% block content %}
-
-<div class="container py-5 d-flex justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-lg border-0">
-
-            <!-- Header -->
-            <div class="card-header text-center bg-dark text-white">
-                <h4 class="m-0 fw-bold">Iniciar Sesión</h4>
+<section class="login-container fadeIn">
+    <div class="login-card">
+        <h2 class="login-title">Iniciar Sesión</h2>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <label>Correo o Cédula</label>
+            <input type="text" name="usuario" placeholder="correo@mail.com / 123456789" required>
+            <label>Contraseña</label>
+            <input type="password" name="password" placeholder="********" required>
+            <div class="login-opts">
+                <label class="remember">
+                    <input type="checkbox" name="remember_me"> Recordarme
+                </label>
+                <a href="{{ url_for('auth.recuperar_password') }}" class="recover">¿Olvidaste tu contraseña?</a>
             </div>
+            <button class="btn-login-submit">Ingresar</button>
+        </form>
 
-            <div class="card-body">
-
-                <!-- 📌 Mensajes Flash -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, msg in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show small" role="alert">
-                        {{ msg|safe }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
-
-                <!-- FORMULARIO LOGIN -->
-                <form method="POST" action="{{ url_for('auth.login') }}">
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Correo o Cédula</label>
-                        <input type="text" name="usuario" class="form-control" placeholder="ej: correo@gmail.com / 12345678" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Contraseña</label>
-                        <input type="password" name="password" class="form-control" placeholder="********" required>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <label class="small">
-                            <input type="checkbox" name="remember_me"> Recordarme
-                        </label>
-
-                        <!-- 🔥 RUTA YA CORRECTA 🔥 -->
-                        <a href="{{ url_for('auth.recuperar_password') }}" class="text-danger small">
-                            ¿Olvidaste tu contraseña?
-                        </a>
-                    </div>
-
-                    <button class="btn btn-danger w-100 fw-bold py-2">
-                        Ingresar
-                    </button>
-                </form>
-            </div>
-        </div>
     </div>
-</div>
+</section>
 
 {% endblock %}
