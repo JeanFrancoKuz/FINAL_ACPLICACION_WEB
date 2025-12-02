@@ -1,102 +1,210 @@
 {% extends "base/layout_admin.html" %}
-{% block title %}Reportes - Admin{% endblock %}
+{% block title %}Reporte General{% endblock %}
 
 {% block content %}
 
-<h2 class="sect-title">Reporte General del Sistema</h2>
+<h2 class="sect-title">Reporte General — HitoSport</h2>
 
-<div class="text-end mb-4">
-    <a href="{{ url_for('reportes.descargar_general_pdf') }}" class="btn btn-success fw-bold px-4">
-        Descargar PDF
+
+<!-- =================================
+     BOTONES DESCARGAR PDF
+================================== -->
+<div class="report-download">
+
+    <a href="{{ url_for('reportes.descargar_general_pdf_bs') }}" class="btn-descargar">
+        📄 Descargar PDF (Bs)
     </a>
+
+    <a href="{{ url_for('reportes.descargar_general_pdf_usd') }}" class="btn-descargar">
+        💵 Descargar PDF (USD)
+    </a>
+
 </div>
 
+
+<!-- =================================
+     BOTONES MONEDA
+================================== -->
+<div class="moneda-switch">
+    <button class="btn-moneda active" type="button" onclick="cambiarMoneda('BS')">
+        🇻🇪 Ver en Bolívares
+    </button>
+    <button class="btn-moneda" type="button" onclick="cambiarMoneda('USD')">
+        Ver en Dólares
+    </button>
+</div>
+
+
+<!-- =================================
+     TARJETAS
+================================== -->
 <div class="report-grid">
 
     <div class="report-card">
-        <h4 class="report-title c-blue">Clientes</h4>
-        <p><strong>Total:</strong> {{ total_clientes }}</p>
-        <p><strong class="c-green">Activos:</strong> {{ activos }}</p>
-        <p><strong class="c-red">Vencidos:</strong> {{ vencidos }}</p>
+        <h3 class="report-title c-green">Ingresos Totales</h3>
+        <p id="card-total" class="report-valor">Cargando...</p>
+        <small id="card-tasa" class="report-tasa">Obteniendo tasa BCV...</small>
     </div>
 
     <div class="report-card">
-        <h4 class="report-title c-yellow">Pagos</h4>
-        <p><strong>Total registros:</strong> {{ total_pagos }}</p>
-        <p><strong>Total Ganancia:</strong> ${{ total_ganancia }}</p>
-        <p><strong class="c-green">Validados:</strong> {{ pagos_validados }}</p>
-        <p><strong class="c-red">Rechazados:</strong> {{ pagos_rechazados }}</p>
-        <p><strong class="c-gray">Pendientes:</strong> {{ pagos_pendientes }}</p>
-    </div>
-
-    <div class="report-card">
-        <h4 class="report-title c-cyan">Asistencias</h4>
-        <p><strong>Este mes:</strong> {{ asistencias_mes }}</p>
-
-        <h6 class="report-subtitle">Por día:</h6>
+        <h3 class="report-title c-yellow">Estado de Pagos</h3>
         <ul class="report-list">
-            {% for dia, total in asistencias_por_dia.items() %}
-                <li><strong>{{ dia }}:</strong> {{ total }}</li>
-            {% endfor %}
+            <li>✔ Validados: {{ pagos_validados }}</li>
+            <li>❌ Rechazados: {{ pagos_rechazados }}</li>
+            <li>🟣 Pendientes: {{ pagos_pendientes }}</li>
+            <li style="margin-top:8px;">
+                {% set total_pagos_seguro = total_pagos if total_pagos else 1 %}
+                {% set eficiencia = (pagos_validados / total_pagos_seguro * 100) if total_pagos else 0 %}
+                {% set rechazo = (pagos_rechazados / total_pagos_seguro * 100) if total_pagos else 0 %}
+                ✅ Eficiencia: {{ "%.1f"|format(eficiencia) }}%<br>
+                🔻 Rechazo: {{ "%.1f"|format(rechazo) }}%
+            </li>
+        </ul>
+    </div>
+
+    <div class="report-card">
+        <h3 class="report-title c-blue">Clientes y Asistencias</h3>
+        <ul class="report-list">
+            <li>👤 Total clientes: {{ total_clientes }}</li>
+            <li>🟢 Activos: {{ activos }}</li>
+            <li>🔴 Vencidos: {{ vencidos }}</li>
+            <li>📆 Asistencias este mes: {{ asistencias_mes }}</li>
         </ul>
     </div>
 
 </div>
 
-<!-- ========================== GRAFICO ========================== -->
 
-<div class="card shadow-sm mt-4" style="background:#111;border:1px solid #222;">
-    <div class="card-body">
-        <h4 class="report-title">Gráfico de Pagos Validados por Mes</h4>
-        <canvas id="graficoPagos" height="130"></canvas>
-    </div>
+<!-- =================================
+     TABLA MENSUAL
+================================== -->
+<h3 class="report-title c-cyan mt-5">Resumen mensual de ingresos</h3>
+
+<table class="admin-table mt-3">
+    <thead>
+        <tr>
+            <th>Mes</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody id="tabla-meses">
+        {% for i in range(meses|length) %}
+        {% set monto = montos_validados[i] %}
+        <tr>
+            <td>{{ meses[i] }}</td>
+            <td class="monto-mes" data-bs="{{ monto }}">
+                {{ monto }} Bs
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<!-- =================================
+     GRÁFICO
+================================== -->
+<div class="report-chart-card">
+    <h4 class="c-cyan">📈 Pagos validados por mes (Bs)</h4>
+    <canvas id="graficoPagos"></canvas>
 </div>
 
-<!-- ========================== CHART TEMPLATE ========================== -->
-<script type="text/template" id="chart-template">
-{
-    "labels": {{ meses|tojson }},
-    "data": {{ montos_validados|tojson }}
-}
+
+<!-- =================================
+     SCRIPT — CONVERSIÓN MONEDA
+================================== -->
+<script>
+    let tasa = 0;
+    let modo = "BS";
+    let ingresosBs = parseFloat('{{ total_ganancias }}') || 0;
+
+    async function obtenerBCV() {
+        try {
+            const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+            const data = await res.json();
+            tasa = data.rates["VES"];
+            actualizarVista();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function actualizarVista() {
+        const cardTotal = document.getElementById("card-total");
+        const cardTasa  = document.getElementById("card-tasa");
+        const filasMes  = document.querySelectorAll(".monto-mes");
+
+        if (!tasa) return;
+
+        if (modo === "BS") {
+            cardTotal.textContent = ingresosBs.toFixed(2) + " Bs";
+            cardTasa.textContent  = "Tasa BCV: " + tasa.toFixed(2) + " Bs/USD";
+
+            filasMes.forEach(td => {
+                const bs = parseFloat(td.dataset.bs) || 0;
+                td.textContent = bs.toFixed(2) + " Bs";
+            });
+
+        } else {
+            const totalUsd = ingresosBs / tasa;
+            cardTotal.textContent = totalUsd.toFixed(2) + " USD";
+            cardTasa.textContent  = "Convertido (BCV " + tasa.toFixed(2) + ")";
+
+            filasMes.forEach(td => {
+                const bs = parseFloat(td.dataset.bs) || 0;
+                const usd = bs / tasa;
+                td.textContent = usd.toFixed(2) + " USD";
+            });
+        }
+    }
+
+    function cambiarMoneda(nuevoModo) {
+        modo = nuevoModo;
+
+        document.querySelectorAll(".btn-moneda").forEach(btn => btn.classList.remove("active"));
+
+        if (modo === "BS") {
+            document.querySelector(".btn-moneda:nth-child(1)").classList.add("active");
+        } else {
+            document.querySelector(".btn-moneda:nth-child(2)").classList.add("active");
+        }
+
+        actualizarVista();
+    }
+
+    obtenerBCV();
 </script>
 
+
+<!-- =================================
+     CHART JS
+================================== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    const raw = document.getElementById("chart-template").textContent;
-    const chartData = JSON.parse(raw);
+    const labelsMeses = JSON.parse('{{ meses|tojson|safe }}');
+    const datosBs     = JSON.parse('{{ montos_validados|tojson|safe }}');
 
     const ctx = document.getElementById("graficoPagos");
 
     new Chart(ctx, {
-        type: 'line',
+        type: "line",
         data: {
-            labels: chartData.labels,
+            labels: labelsMeses,
             datasets: [{
-                label: "Pagos Validados ($)",
-                data: chartData.data,
-                borderWidth: 3,
-                borderColor: "#00c9ff",
-                backgroundColor: "rgba(0,201,255,0.25)",
-                tension: 0.3,
-                fill: true
+                label: "Pagos validados (Bs)",
+                data: datosBs,
+                borderWidth: 3
             }]
         },
         options: {
             responsive: true,
-            plugins:{
-                legend:{ labels:{ color:"#fff" } }
-            },
             scales: {
-                x: { ticks:{ color:"#ccc" }, grid:{ color:"#333"} },
-                y: { ticks:{ color:"#ccc" }, grid:{ color:"#333"} }
+                y: { beginAtZero: true }
             }
         }
     });
-
-});
 </script>
 
 {% endblock %}

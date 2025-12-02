@@ -6,43 +6,147 @@
 <h2 class="sect-title">Registrar Pago</h2>
 <a href="{{ url_for('pago.lista_pagos') }}" class="btn-back">◀ Volver</a>
 
-<!-- Info del cliente -->
-<div class="card-pago-info">
-    <h5>{{ cliente.nombre }}</h5>
-    <p><b>Cédula:</b> {{ cliente.cedula }}</p>
-    <p><b>Correo:</b> {{ cliente.correo }}</p>
+
+<!-- ================================
+     ENCABEZADO: CLIENTE + MINI TARJETAS
+================================ -->
+<div class="pago-header-row">
+
+    <!-- ==== INFO CLIENTE ==== -->
+    <div class="pago-cliente-box">
+        <h5>{{ cliente.nombre }}</h5>
+        <p><b>Cédula:</b> {{ cliente.cedula }}</p>
+        <p><b>Correo:</b> {{ cliente.correo }}</p>
+    </div>
+
+    <!-- ==== TARJETAS DERECHA COMPACTAS ==== -->
+    <div class="pago-mini-cards">
+
+        <!-- TASA BCV -->
+        <div class="mini-card">
+            <span class="mini-title">Tasa BCV</span>
+            <span id="miniTasa" class="mini-value">--</span>
+        </div>
+
+        <!-- PESAS -->
+        <button class="mini-card-btn" id="pesasBtn">
+            PESAS — <span id="miniPesas">-- Bs</span>
+        </button>
+
+        <!-- FULL -->
+        <button class="mini-card-btn" id="fullBtn">
+            FULL — <span id="miniFull">-- Bs</span>
+        </button>
+
+    </div>
+
 </div>
 
-<!-- FORMULARIO -->
-<div class="form-pago">
-    <form method="POST" enctype="multipart/form-data" class="row g-3">
 
-        <div class="col-md-4">
-            <label>Monto</label>
-            <input type="number" name="monto" step="0.01" required placeholder="Cantidad">
-        </div>
+<!-- ================================
+     FORMULARIO DE PAGO
+================================ -->
+<div class="form-pago-pro">
+    <form method="POST" enctype="multipart/form-data">
 
-        <div class="col-md-4">
-            <label>Tipo de Pago</label>
-            <select name="tipo" required>
-                <option value="EFECTIVO">Efectivo</option>
-                <option value="TRANSFERENCIA">Transferencia / Pago movil</option>
-                <option value="TARJETA">Tarjeta</option>
-            </select>
-        </div>
+        <!-- MONTO -->
+        <label for="monto">
+            <i class="fa-solid fa-coins"></i> Monto (Bs)
+        </label>
+        <input type="number" name="monto" step="0.01" placeholder="Monto" required>
 
-        <div class="col-md-4">
-            <label>Comprobante (opcional)</label>
-            <input type="file" name="comprobante" accept="image/*,.pdf">
-        </div>
+        <!-- TIPO -->
+        <label for="tipo">
+            <i class="fa-solid fa-credit-card"></i> Tipo de pago
+        </label>
+        <select name="tipo" required>
+            <option value="">Seleccionar</option>
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="TRANSFERENCIA">Transferencia / Pago Móvil</option>
+            <option value="TARJETA">Tarjeta</option>
+        </select>
+
+        <!-- PLAN -->
+        <label for="plan">
+            <i class="fa-solid fa-tags"></i> Plan
+        </label>
+        <select name="plan" required id="planSelect">
+            <option value="">Seleccionar...</option>
+            <option value="PESAS">Pesas</option>
+            <option value="FULL">Full</option>
+            <option value="FULL">Promoción</option>
+        </select>
+
+        <!-- DESCRIPCIÓN -->
+        <label for="descripcion">
+            <i class="fa-solid fa-pen"></i> Descripción (opcional)
+        </label>
+        <textarea name="descripcion" rows="2" placeholder=""></textarea>
+
+        <!-- COMPROBANTE -->
+        <label for="comprobante">
+            <i class="fa-solid fa-file-arrow-up"></i> Subir comprobante (opcional)
+        </label>
+        <input type="file" name="comprobante" accept="image/*,.pdf">
 
         <!-- BOTONES -->
-        <div class="mt-4 d-flex gap-3">
-            <button class="btn-save-pago" type="submit">Registrar Pago</button>
-            <a href="{{ url_for('pago.lista_pagos') }}" class="btn-cancel-pago">Cancelar</a>
+        <div class="form-pro-buttons">
+            <button class="btn-save-pago" type="submit">✔ Registrar Pago</button>
+            <a href="{{ url_for('pago.lista_pagos') }}" class="btn-cancel-pago">✖ Cancelar</a>
         </div>
 
     </form>
 </div>
+
+
+
+<!-- ================================
+     SCRIPT API — CONVERSIÓN BCV
+================================ -->
+<script>
+let tasa = 0;
+
+async function cargarTasa() {
+    try {
+        const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+        const data = await res.json();
+
+        tasa = data.rates["VES"];
+
+        // Mostrar tasa actual
+        document.getElementById("miniTasa").textContent =
+            tasa.toFixed(2) + " Bs";
+
+        // Precios USD
+        const pesasUsd = 30;
+        const fullUsd  = 35;
+
+        // Conversión
+        document.getElementById("miniPesas").textContent =
+            (pesasUsd * tasa).toFixed(2) + " Bs";
+
+        document.getElementById("miniFull").textContent =
+            (fullUsd * tasa).toFixed(2) + " Bs";
+
+        // Rellenar automáticamente el select Plan
+        document.getElementById("pesasBtn").addEventListener("click", () => {
+            document.getElementById("planSelect").value = "PESAS";
+            document.querySelector("input[name='monto']").value =
+                (pesasUsd * tasa).toFixed(2);
+        });
+
+        document.getElementById("fullBtn").addEventListener("click", () => {
+            document.getElementById("planSelect").value = "FULL";
+            document.querySelector("input[name='monto']").value =
+                (fullUsd * tasa).toFixed(2);
+        });
+
+    } catch (err) {
+        document.getElementById("miniTasa").textContent = "ERR";
+    }
+}
+
+cargarTasa();
+</script>
 
 {% endblock %}

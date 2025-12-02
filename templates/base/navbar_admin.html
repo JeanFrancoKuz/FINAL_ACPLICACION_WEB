@@ -24,7 +24,7 @@
 
     <!-- 🔥 Logout normal (desktop) -->
     <div class="admin-user">
-        👤 {{ current_user.nombre }}
+        {{ current_user.nombre }}
         <form action="{{ url_for('auth.logout') }}" method="POST">
             <button class="logout-btn">Salir</button>
         </form>

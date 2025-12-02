@@ -1,0 +1,26 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Registrar Asistencia{% endblock %}
+
+{% block content %}
+
+<h2 class="cliente-title text-center">🟢 Registrar Asistencia</h2>
+
+<div class="page-center">
+    <div class="cliente-card max-500 text-center">
+
+        <p class="cliente-text mb-4">
+            Para registrar tu entrada solo haz clic en el botón.
+            <br>
+            Solo puedes registrar una asistencia por día.
+        </p>
+
+        <form method="POST" action="{{ url_for('asistencia.registrar_asistencia') }}">
+            <button class="cliente-btn btn-green w-100">
+                ✔ Registrar asistencia
+            </button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

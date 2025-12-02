@@ -45,7 +45,6 @@ def subir_foto(entidad, entidad_id):
         flash("No tienes permiso para subir imágenes a otro usuario.", "danger")
         return redirect(url_for("index"))
 
-
     # 📥 POST = Guardar archivo
     if request.method == "POST":
         archivo = request.files.get("foto")
@@ -69,12 +68,15 @@ def subir_foto(entidad, entidad_id):
         os.makedirs(upload_dir, exist_ok=True)
         archivo.save(os.path.join(upload_dir, nombre_archivo))
 
-        # Registro BD
-        foto = Foto(nombre_archivo=nombre_archivo, ruta=f"uploads/{nombre_archivo}", uploaded_by=current_user.id)
-
-        # Asociar destino
-        if entidad_upper == "CLIENTE":
-            foto.cliente_id = entidad_id
+        # ⚡ Registro BD corregido
+        foto = Foto(
+            nombre_archivo=nombre_archivo,
+            ruta=f"uploads/{nombre_archivo}",
+            cliente_id=entidad_id,          # 👈 Cliente siempre
+            pago_id=None,                   # 👈 FIX
+            progreso_id=None,               # 👈 FIX
+            uploaded_by=current_user.id
+        )
 
         db.session.add(foto)
 

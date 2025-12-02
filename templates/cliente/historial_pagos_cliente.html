@@ -1,4 +1,4 @@
-{% extends "base/layout_cliente.html" %}
+{% extends "base/layout_cliente.html" %} 
 {% block title %}Historial de Pagos{% endblock %}
 
 {% block content %}
@@ -13,6 +13,7 @@
     <thead>
         <tr>
             <th>#</th>
+            <th>Plan</th>            <!-- 👈 NUEVO -->
             <th>Monto (Bs)</th>
             <th>Tipo</th>
             <th>Fecha</th>
@@ -25,7 +26,17 @@
         {% for pago in pagos %}
         <tr>
             <td>{{ loop.index }}</td>
-            <td class="c-green fw-bold">{{ pago.monto }}Bs.</td>
+
+            <!-- 👇 Mostramos plan o "N/D" si es pago antiguo -->
+            <td>
+                {% if pago.plan %}
+                    {{ pago.plan.value }}
+                {% else %}
+                    <span class="cliente-text">N/D</span>
+                {% endif %}
+            </td>
+
+            <td class="c-green fw-bold">{{ pago.monto }} Bs.</td>
             <td>{{ pago.tipo.value }}</td>
             <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
 

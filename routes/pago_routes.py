@@ -1,15 +1,15 @@
 import os
-from datetime import datetime, date
+from datetime import datetime
 from flask import (
     Blueprint, render_template, request,
-    redirect, url_for, flash, abort, current_app
+    redirect, url_for, flash, current_app
 )
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from dateutil.relativedelta import relativedelta
 
 from extensions import db
-from models.pagos import Pago, EstadoPago, TipoPago
+from models.pagos import Pago, EstadoPago, TipoPago, PlanPago
 from models.clientes import Cliente, EstadoMembresia
 from models.fotos import Foto
 from routes.decoradores import roles_required
@@ -18,22 +18,18 @@ from routes.decoradores import roles_required
 pago_bp = Blueprint("pago", __name__, url_prefix="/pagos")
 
 
-# =====================================================================
-# 📁 Carpeta de comprobantes
-# =====================================================================
+# ===========================================================
+# 📁 Carpeta comprobantes
+# ===========================================================
 def get_dir():
     ruta = os.path.join(current_app.root_path, "static", "uploads", "comprobantes")
     os.makedirs(ruta, exist_ok=True)
     return ruta
 
 
-# =====================================================================
-# ███ ADMIN — TODAS LAS FUNCIONES Y CRUD COMPLETO
-# =====================================================================
-
-# ---------------------------------------------------------
-# 📋 LISTA DE PAGOS (ADMIN)
-# ---------------------------------------------------------
+# ===========================================================
+# ███ ADMIN – LISTA DE PAGOS
+# ===========================================================
 @pago_bp.route("/lista")
 @login_required
 @roles_required("ADMIN")
@@ -59,15 +55,15 @@ def lista_pagos():
     return render_template("admin/lista_pagos_admin.html", pagos=pagos)
 
 
-# ---------------------------------------------------------
-# ➕ REGISTRAR PAGO (ADMIN)
-# ---------------------------------------------------------
+# ===========================================================
+# ➕ Registrar pago (ADMIN)
+# ===========================================================
 @pago_bp.route("/registrar_admin/<int:cliente_id>", methods=["GET", "POST"])
 @login_required
 @roles_required("ADMIN")
 def registrar_pago_admin(cliente_id):
 
-    # Seleccionar cliente antes
+    # Selección de cliente
     if cliente_id == 0:
         q = request.args.get("q", "")
         clientes = Cliente.query.filter(
@@ -82,42 +78,40 @@ def registrar_pago_admin(cliente_id):
 
         monto = request.form.get("monto")
         tipo = request.form.get("tipo")
+        plan = request.form.get("plan")
+        descripcion = request.form.get("descripcion")
         archivo = request.files.get("comprobante")
 
-        if not monto or not tipo:
-            flash("Monto y tipo requeridos.", "danger")
+        if not monto or not tipo or not plan:
+            flash("Monto, tipo y plan requeridos.", "danger")
             return redirect(request.url)
 
         try:
-            # Crear pago
             pago = Pago(
                 cliente_id=cliente.id,
                 monto=float(monto),
                 tipo=TipoPago[tipo.upper()],
+                plan=PlanPago[plan.upper()],
+                descripcion=descripcion,
                 estado=EstadoPago.PENDIENTE,
                 fecha_pago=datetime.utcnow()
             )
             db.session.add(pago)
-            db.session.flush()
+            db.session.flush()   # obtiene pago.id
 
-            # Subida de comprobante
+            # 📸 Guardar archivo
             if archivo and archivo.filename:
-
                 ext = os.path.splitext(archivo.filename)[1].lower()
-                if ext not in [".jpg", ".jpeg", ".png", ".pdf"]:
-                    flash("Formato inválido.", "danger")
-                    return redirect(request.url)
-
                 filename = secure_filename(
                     f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
                 )
-
                 archivo.save(os.path.join(get_dir(), filename))
 
                 db.session.add(Foto(
                     nombre_archivo=filename,
                     ruta=f"uploads/comprobantes/{filename}",
                     pago=pago,
+                    cliente_id=cliente.id,
                     uploaded_by=current_user.id
                 ))
 
@@ -133,77 +127,36 @@ def registrar_pago_admin(cliente_id):
     return render_template("admin/registrar_pago_admin.html", cliente=cliente)
 
 
-# ---------------------------------------------------------
-# 🟢 VALIDAR / RECHAZAR - (ADMIN)
-# ---------------------------------------------------------
-@pago_bp.route("/validar/<int:pago_id>", methods=["POST"])
-@login_required
-@roles_required("ADMIN")
-def validar_pago(pago_id):
-    pago = Pago.query.get_or_404(pago_id)
-    cliente = pago.cliente
-    accion = request.form.get("accion")
-    hoy = date.today()
-
-    try:
-        if accion == "aprobar":
-            pago.validar()
-
-            venc = cliente.membresia_vencimiento
-            if isinstance(venc, datetime):
-                venc = venc.date()
-
-            if venc and venc >= hoy:
-                cliente.membresia_vencimiento = venc + relativedelta(months=1)
-            else:
-                cliente.membresia_vencimiento = hoy + relativedelta(months=1)
-
-            cliente.estado_membresia = EstadoMembresia.ACTIVO
-
-        elif accion == "rechazar":
-            pago.rechazar()
-
-        else:
-            flash("Acción inválida.", "danger")
-
-        db.session.commit()
-        flash("Pago procesado ✔", "success")
-
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error: {e}", "danger")
-
-    return redirect(url_for("pago.lista_pagos"))
-
-
-# ---------------------------------------------------------
-# ✏ EDITAR PAGO (ADMIN)
-# ---------------------------------------------------------
+# ===========================================================
+# ✏ Editar pago (ADMIN)
+# ===========================================================
 @pago_bp.route("/editar_admin/<int:pago_id>", methods=["GET", "POST"])
 @login_required
 @roles_required("ADMIN")
 def editar_pago_admin(pago_id):
     pago = Pago.query.get_or_404(pago_id)
+    cliente = pago.cliente
 
     if request.method == "POST":
         monto = request.form.get("monto")
         tipo = request.form.get("tipo")
+        plan = request.form.get("plan")
+        descripcion = request.form.get("descripcion")
         archivo = request.files.get("comprobante")
 
-        if not monto or not tipo:
-            flash("Monto y tipo requeridos.", "danger")
+        if not monto or not tipo or not plan:
+            flash("Monto, tipo y plan requeridos.", "danger")
             return redirect(request.url)
 
         try:
             pago.monto = float(monto)
-            pago.tipo  = TipoPago[tipo.upper()]
+            pago.tipo = TipoPago[tipo.upper()]
+            pago.plan = PlanPago[plan.upper()]
+            pago.descripcion = descripcion
 
+            # 📸 si hay nuevo archivo
             if archivo and archivo.filename:
                 ext = os.path.splitext(archivo.filename)[1].lower()
-                if ext not in [".jpg", ".jpeg", ".png", ".pdf"]:
-                    flash("Formato inválido.", "danger")
-                    return redirect(request.url)
-
                 filename = secure_filename(
                     f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
                 )
@@ -213,6 +166,7 @@ def editar_pago_admin(pago_id):
                     nombre_archivo=filename,
                     ruta=f"uploads/comprobantes/{filename}",
                     pago=pago,
+                    cliente_id=cliente.id,
                     uploaded_by=current_user.id
                 ))
 
@@ -228,10 +182,61 @@ def editar_pago_admin(pago_id):
     return render_template("admin/editar_pago_admin.html", pago=pago)
 
 
-# ---------------------------------------------------------
-# 🗑 ELIMINAR PAGO (ADMIN)
-# ---------------------------------------------------------
-@pago_bp.route("/eliminar_admin/<int:pago_id>", methods=["POST"])
+# ===========================================================
+# 🧾 Validar pago (ADMIN)
+# ===========================================================
+@pago_bp.route("/validar/<int:pago_id>", methods=["POST"])
+@login_required
+@roles_required("ADMIN")
+def validar_pago(pago_id):
+    pago = Pago.query.get_or_404(pago_id)
+    cliente = pago.cliente
+
+    try:
+        pago.estado = EstadoPago.VALIDADO
+
+        hoy = datetime.utcnow()
+        if not cliente.membresia_vencimiento or cliente.membresia_vencimiento < hoy:
+            cliente.activar_membresia(30)
+        else:
+            cliente.membresia_vencimiento += relativedelta(days=30)
+            cliente.estado_membresia = EstadoMembresia.ACTIVO
+
+        db.session.commit()
+        flash("Pago validado ✔", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al validar pago: {e}", "danger")
+
+    return redirect(url_for("pago.lista_pagos"))
+
+
+# ===========================================================
+# 🧾 Rechazar pago (ADMIN)
+# ===========================================================
+@pago_bp.route("/rechazar/<int:pago_id>", methods=["POST"])
+@login_required
+@roles_required("ADMIN")
+def rechazar_pago(pago_id):
+    pago = Pago.query.get_or_404(pago_id)
+
+    try:
+        pago.estado = EstadoPago.RECHAZADO
+        db.session.commit()
+        flash("Pago rechazado ❌", "warning")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al rechazar pago: {e}", "danger")
+
+    return redirect(url_for("pago.lista_pagos"))
+
+
+# ===========================================================
+# 🗑 Eliminar pago (ADMIN)
+# ===========================================================
+@pago_bp.route("/eliminar/<int:pago_id>", methods=["POST"])
 @login_required
 @roles_required("ADMIN")
 def eliminar_pago_admin(pago_id):
@@ -241,21 +246,16 @@ def eliminar_pago_admin(pago_id):
         db.session.delete(pago)
         db.session.commit()
         flash("Pago eliminado ✔", "success")
-
     except Exception as e:
         db.session.rollback()
-        flash(f"Error: {e}", "danger")
+        flash(f"Error al eliminar pago: {e}", "danger")
 
     return redirect(url_for("pago.lista_pagos"))
 
 
-# =====================================================================
-# ███ CLIENTE — NUEVA ESTRUCTURA
-# =====================================================================
-
-# ---------------------------------------------------------
-# 🟦 HOME PAGOS CLIENTE (BCV + PLANES + HISTORIAL reducido)
-# ---------------------------------------------------------
+# ===========================================================
+# ███ CLIENTE
+# ===========================================================
 @pago_bp.route("/cliente")
 @login_required
 @roles_required("CLIENTE")
@@ -271,7 +271,7 @@ def pagos_cliente():
 
 
 # ---------------------------------------------------------
-# 🟩 REGISTRAR PAGO CLIENTE (PLANES)
+# 🟩 Registrar pago manual (CLIENTE)
 # ---------------------------------------------------------
 @pago_bp.route("/cliente/registrar", methods=["GET", "POST"])
 @login_required
@@ -279,14 +279,20 @@ def pagos_cliente():
 def registrar_pago_cliente():
     cliente = current_user.cliente
 
+    monto_sugerido = request.args.get("bs", type=float)
+    plan = request.args.get("plan", default="")
+    descripcion = request.args.get("desc", default="")
+
     if request.method == "POST":
 
         monto = request.form.get("monto")
-        tipo  = request.form.get("tipo")
+        tipo = request.form.get("tipo")
+        plan_form = request.form.get("plan") or plan
+        descripcion_form = request.form.get("descripcion") or descripcion
         archivo = request.files.get("comprobante")
 
-        if not monto or not tipo:
-            flash("Monto y tipo requeridos.", "danger")
+        if not monto or not tipo or not plan_form:
+            flash("Monto, tipo y plan requeridos.", "danger")
             return redirect(request.url)
 
         try:
@@ -294,6 +300,8 @@ def registrar_pago_cliente():
                 cliente_id=cliente.id,
                 monto=float(monto),
                 tipo=TipoPago[tipo.upper()],
+                plan=PlanPago[plan_form.upper()],
+                descripcion=descripcion_form,
                 estado=EstadoPago.PENDIENTE,
                 fecha_pago=datetime.utcnow()
             )
@@ -301,7 +309,6 @@ def registrar_pago_cliente():
             db.session.flush()
 
             if archivo and archivo.filename:
-
                 ext = os.path.splitext(archivo.filename)[1].lower()
                 filename = secure_filename(
                     f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
@@ -312,6 +319,7 @@ def registrar_pago_cliente():
                     nombre_archivo=filename,
                     ruta=f"uploads/comprobantes/{filename}",
                     pago=pago,
+                    cliente_id=cliente.id,
                     uploaded_by=current_user.id
                 ))
 
@@ -324,86 +332,27 @@ def registrar_pago_cliente():
 
         return redirect(url_for("pago.historial_pagos_cliente"))
 
-    monto_sugerido = request.args.get("monto", type=float)
-
     return render_template(
         "cliente/registrar_pago_cliente.html",
         cliente=cliente,
-        monto_sugerido=monto_sugerido
+        monto_sugerido=monto_sugerido,
+        plan=plan,
+        descripcion=descripcion
     )
 
 
-# ---------------------------------------------------------
-# 🟨 HISTORIAL COMPLETO CLIENTE
-# ---------------------------------------------------------
+# ===========================================================
+# 🟨 Historial completo cliente
+# ===========================================================
 @pago_bp.route("/cliente/historial")
 @login_required
 @roles_required("CLIENTE")
 def historial_pagos_cliente():
     cliente = current_user.cliente
-
     pagos = Pago.query.filter_by(cliente_id=cliente.id).order_by(Pago.fecha_pago.desc()).all()
 
     return render_template(
         "cliente/historial_pagos_cliente.html",
         cliente=cliente,
         pagos=pagos
-    )
-
-# =====================================================
-# 🟢 REGISTRAR PAGO (CLIENTE - desde plan con API BCV)
-# =====================================================
-@pago_bp.route("/registrar", methods=["GET", "POST"])
-@login_required
-def registrar_pago_cliente_auto():
-
-    bs = request.args.get("bs", type=float)
-
-    if request.method == "POST":
-
-        tipo = request.form.get("tipo")
-        archivo = request.files.get("comprobante")
-        monto = request.form.get("monto")  # será Bs
-
-        if not monto or not tipo:
-            flash("Debe ingresar monto y tipo de pago.", "danger")
-            return redirect(request.url)
-
-        try:
-            pago = Pago(
-                cliente_id=current_user.cliente.id,
-                monto=float(monto),  # <- GUARDAMOS SIEMPRE EN BS
-                tipo=TipoPago[tipo.upper()],
-                estado=EstadoPago.PENDIENTE,
-                fecha_pago=datetime.utcnow()
-            )
-            db.session.add(pago)
-            db.session.flush()
-
-            if archivo and archivo.filename:
-                ext = os.path.splitext(archivo.filename)[1].lower()
-                filename = secure_filename(
-                    f"pago_{pago.id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
-                )
-                archivo.save(os.path.join(get_dir(), filename))
-
-                db.session.add(Foto(
-                    nombre_archivo=filename,
-                    ruta=f"uploads/comprobantes/{filename}",
-                    pago=pago,
-                    uploaded_by=current_user.id
-                ))
-
-            db.session.commit()
-            flash("Pago enviado ✔", "success")
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error: {e}", "danger")
-
-        return redirect(url_for("pago.historial_pagos_cliente"))
-
-    return render_template(
-        "cliente/registrar_pago_cliente.html",
-        monto_sugerido=bs   # <- pre-llenamos campo en Bs
     )

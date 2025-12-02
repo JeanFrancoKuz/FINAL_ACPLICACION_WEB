@@ -5,12 +5,20 @@
 
 <h2 class="sect-title">Gestión de Pagos</h2>
 
-<a href="{{ url_for('pago.registrar_pago_admin', cliente_id=0) }}" class="btn-new">+ Registrar Pago</a>
+<a href="{{ url_for('pago.registrar_pago_admin', cliente_id=0) }}" class="btn-new">
+    + Registrar Pago
+</a>
+
 
 <!-- ================== FILTROS ================== -->
 <div class="card-dark mb-3">
     <form method="GET" class="filter-row">
 
+        <!-- Buscar cliente -->
+        <input type="text" name="q" placeholder="Buscar cliente..."
+               value="{{ request.args.get('q','') }}">
+
+        <!-- Estado -->
         <select name="estado">
             <option value="">Todos</option>
             <option value="PENDIENTE"  {{ 'selected' if request.args.get('estado')=='PENDIENTE' else '' }}>Pendiente</option>
@@ -22,6 +30,7 @@
     </form>
 </div>
 
+
 <!-- ================== TABLA ================== -->
 <div class="table-box">
 <table class="admin-table">
@@ -31,6 +40,7 @@
             <th>Cliente</th>
             <th>Monto</th>
             <th>Tipo</th>
+            <th>Plan</th>
             <th>Fecha</th>
             <th>Estado</th>
             <th>Comprobantes</th>
@@ -39,57 +49,89 @@
     </thead>
 
     <tbody>
+
         {% for pago in pagos %}
         <tr>
+
+            <!-- ================== INFO ================== -->
             <td>{{ loop.index }}</td>
 
             <td>
-                <b>{{ pago.cliente.nombre }}</b><br>
+                <b>{{ pago.cliente.nombre }}</b>
+                <br>
+                <span class="small text-muted">{{ pago.cliente.cedula }}</span>
+                <br>
                 <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=pago.cliente.id) }}" class="tag-new">+ Pago</a>
             </td>
 
-            <td class="money">${{ "%.2f"|format(pago.monto) }}</td>
+            <td class="money">Bs {{ "%.2f"|format(pago.monto) }}</td>
             <td>{{ pago.tipo.value }}</td>
+            <td>{{ pago.plan.value }}</td>
             <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
 
+
+            <!-- ================== ESTADO ================== -->
             <td>
                 <span class="estado estado-{{ pago.estado.value|lower }}">
                     {{ pago.estado.value }}
                 </span>
             </td>
 
+
+            <!-- ================== COMPROBANTES ================== -->
             <td>
                 {% if pago.fotos %}
                     {% for foto in pago.fotos %}
-                    <a href="{{ url_for('static', filename=foto.ruta) }}" target="_blank" class="link-ver">Ver Archivo</a><br>
+                        <a href="{{ url_for('static', filename=foto.ruta) }}"
+                           target="_blank" class="link-ver">
+                           Ver archivo
+                        </a><br>
                     {% endfor %}
                 {% else %}
                     <span class="text-muted">Sin archivo</span>
                 {% endif %}
             </td>
 
-            <td>
 
-                <a href="{{ url_for('pago.editar_pago_admin', pago_id=pago.id) }}" class="btn-a warn">Editar</a>
+            <!-- ================== ACCIONES ================== -->
+            <td class="actions">
 
-                <form action="{{ url_for('pago.eliminar_pago_admin', pago_id=pago.id) }}" method="POST" style="display:inline-block;"
-                        onsubmit="return confirm('¿Eliminar este pago definitivamente?');">
+                <!-- EDITAR -->
+                <a href="{{ url_for('pago.editar_pago_admin', pago_id=pago.id) }}" class="btn-a warn">
+                    Editar
+                </a>
+
+                <!-- ELIMINAR -->
+                <form action="{{ url_for('pago.eliminar_pago_admin', pago_id=pago.id) }}"
+                      method="POST"
+                      onsubmit="return confirm('¿Eliminar este pago definitivamente?');"
+                      style="display:inline-block;">
                     <button class="btn-a danger">Eliminar</button>
                 </form>
 
-                {% if pago.estado.value=='PENDIENTE' %}
-                <form action="{{ url_for('pago.validar_pago', pago_id=pago.id) }}" method="POST" style="display:inline-block;">
-                    <button type="submit" name="accion" value="aprobar" class="btn-a success">Aprobar</button>
-                    <button type="submit" name="accion" value="rechazar" class="btn-a dark">Rechazar</button>
+                <!-- VALIDAR / RECHAZAR SOLO SI PENDIENTE -->
+                {% if pago.estado.value == 'PENDIENTE' %}
+                <form action="{{ url_for('pago.validar_pago', pago_id=pago.id) }}"
+                        method="POST" style="display:inline-block;">
+                    <button class="btn-a success">Aprobar</button>
+                </form>
+
+                <form action="{{ url_for('pago.rechazar_pago', pago_id=pago.id) }}"
+                        method="POST" style="display:inline-block;">
+                    <button class="btn-a dark">Rechazar</button>
                 </form>
                 {% endif %}
+
             </td>
+
         </tr>
         {% else %}
-        <tr><td colspan="8" class="no-data">No hay pagos registrados.</td></tr>
+        <tr>
+            <td colspan="9" class="no-data">No hay pagos registrados.</td>
+        </tr>
         {% endfor %}
-    </tbody>
 
+    </tbody>
 </table>
 </div>
 

@@ -19,12 +19,11 @@ from werkzeug.utils import secure_filename
 from routes.decoradores import roles_required
 
 from models.clientes import Cliente, EstadoMembresia
-from models.pagos import Pago, EstadoPago
 from models.usuarios import Usuario
 from models.roles import Rol
-from models.fotos import Foto
 from models.asistencias import Asistencia
 from extensions import db
+
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -60,7 +59,9 @@ def dashboard_admin():
             .scalar()
         )
 
-        # --- Pagos ---
+        # --- Pagos (solo métricas, sin CRUD) ---
+        from models.pagos import Pago, EstadoPago  # import interno solo aquí
+
         pagos_registrados = db.session.query(func.count(Pago.id)).scalar()
 
         pagos_pendientes = (
@@ -182,7 +183,6 @@ def crear_cliente():
         temp_password = secrets.token_urlsafe(8)
 
         try:
-            # Crear usuario vinculado
             nuevo_usuario = Usuario(
                 nombre=nombre,
                 correo=correo or f"{cedula}@local.invalid",
@@ -192,9 +192,8 @@ def crear_cliente():
             )
             nuevo_usuario.set_password(temp_password)
             db.session.add(nuevo_usuario)
-            db.session.flush()  # para obtener nuevo_usuario.id
+            db.session.flush()
 
-            # Crear cliente + activar membresía inicial
             nuevo_cliente = Cliente(
                 nombre=nombre,
                 cedula=cedula,
@@ -202,13 +201,11 @@ def crear_cliente():
                 correo=correo,
                 usuario_id=nuevo_usuario.id,
             )
-            # usamos lógica del modelo
             nuevo_cliente.activar_membresia(duracion_dias=30)
 
             db.session.add(nuevo_cliente)
             db.session.commit()
 
-            # Mostramos credenciales en plantilla especial
             return render_template(
                 "admin/credenciales_generadas.html",
                 usuario=nuevo_usuario.correo,
@@ -236,33 +233,27 @@ def editar_cliente(id):
     cliente = Cliente.query.get_or_404(id)
 
     if request.method == "POST":
-        # Campos básicos
         cliente.nombre = request.form.get("nombre", "").strip()
         cliente.cedula = request.form.get("cedula", "").strip()
         cliente.correo = request.form.get("correo", "").strip().lower() or None
         cliente.telefono = request.form.get("telefono", "").strip()
 
-        # Estado de membresía
         estado = request.form.get("estado_membresia", "")
         if estado and estado in EstadoMembresia.__members__:
             cliente.estado_membresia = EstadoMembresia[estado]
 
-        # Fecha de vencimiento
         fecha_vencimiento = request.form.get("membresia_vencimiento", "")
         if fecha_vencimiento:
             try:
                 dt = datetime.strptime(fecha_vencimiento, "%Y-%m-%d")
-                # Mantengo tu enfoque original con timezone para no romper otras partes
                 cliente.membresia_vencimiento = dt.replace(tzinfo=timezone.utc)
             except ValueError:
                 flash("Formato de fecha inválido. Usa AAAA-MM-DD.", "warning")
 
-        # Actualizar estado según vencimiento
         if cliente.membresia_vencimiento:
             if cliente.membresia_vencimiento < datetime.now(timezone.utc):
                 cliente.estado_membresia = EstadoMembresia.VENCIDO
 
-        # 📸 FOTO DE PERFIL (NUEVO)
         archivo = request.files.get("foto_perfil")
         if archivo and archivo.filename:
             ext = os.path.splitext(archivo.filename)[1].lower()
@@ -276,7 +267,6 @@ def editar_cliente(id):
             )
             archivo.save(os.path.join(perfil_dir, filename))
 
-            # Guardamos solo la ruta relativa desde /static
             cliente.foto_perfil = f"uploads/perfil/{filename}"
 
         try:
@@ -294,7 +284,6 @@ def editar_cliente(id):
 
         return redirect(url_for("admin.lista_clientes"))
 
-    # Días restantes (si tienes método en el modelo)
     dias_restantes = cliente.dias_restantes()
 
     return render_template(
@@ -324,42 +313,6 @@ def eliminar_cliente(id):
 
 
 # ============================================================
-# ✅ Validar comprobante (versión simple por cliente)
-# ⚠ OJO: la validación por pago específico la manejaremos en pago_routes
-# ============================================================
-@admin_bp.route("/validar_comprobante/<int:id>", methods=["POST"])
-@login_required
-@roles_required("ADMIN")
-def validar_comprobante(id):
-    cliente = Cliente.query.get_or_404(id)
-    accion = request.form.get("accion")
-
-    if accion == "aprobar":
-        cliente.estado_membresia = EstadoMembresia.ACTIVO
-
-        if not cliente.membresia_vencimiento or cliente.membresia_vencimiento < date.today():
-            cliente.membresia_vencimiento = date.today() + timedelta(days=30)
-        else:
-            cliente.membresia_vencimiento += timedelta(days=30)
-
-        flash("Membresía renovada +1 mes ✔", "success")
-
-    elif accion == "rechazar":
-        cliente.estado_membresia = EstadoMembresia.INACTIVO
-        flash("Comprobante rechazado. El cliente queda inactivo.", "warning")
-    else:
-        flash("Acción no válida.", "danger")
-
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error al validar comprobante: {str(e)}", "danger")
-
-    return redirect(url_for("admin.lista_clientes"))
-
-
-# ============================================================
 # 🔎 Detalles del cliente
 # ============================================================
 @admin_bp.route("/detalle/<int:id>")
@@ -368,18 +321,10 @@ def validar_comprobante(id):
 def cliente_detalle_admin(id):
     cliente = Cliente.query.get_or_404(id)
 
-    foto_perfil = cliente.foto_perfil  # string con la ruta relativa o None
+    foto_perfil = cliente.foto_perfil
 
-    pagos = (
-        Pago.query.filter_by(cliente_id=cliente.id)
-        .order_by(Pago.fecha_pago.desc())
-        .all()
-    )
-    asistencias = (
-        Asistencia.query.filter_by(cliente_id=cliente.id)
-        .order_by(Asistencia.fecha.desc())
-        .all()
-    )
+    pagos = sorted(cliente.pagos, key=lambda p: p.fecha_pago, reverse=True)
+    asistencias = sorted(cliente.asistencias, key=lambda a: a.fecha, reverse=True)
 
     return render_template(
         "admin/cliente_detalle_admin.html",
@@ -388,4 +333,3 @@ def cliente_detalle_admin(id):
         pagos=pagos,
         asistencias=asistencias,
     )
-

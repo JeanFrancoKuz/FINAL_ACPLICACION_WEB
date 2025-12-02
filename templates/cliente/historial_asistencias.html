@@ -1,0 +1,159 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Historial de Asistencias{% endblock %}
+
+{% block content %}
+
+<h2 class="cliente-title text-center">📅 Historial de asistencias</h2>
+
+<!-- 📌 CONTENEDOR DEL CALENDARIO -->
+<div id="calendar" class="mt-5"></div>
+
+<!-- Botón registrar -->
+<form action="{{ url_for('asistencia.registrar_asistencia') }}" method="POST" class="text-center mt-4">
+    <button class="cliente-btn btn-blue">
+        ✔ Registrar asistencia ahora
+    </button>
+</form>
+
+<!-- ============================
+ 🔹 FULLCALENDAR (CSS + JS GLOBAL)
+============================= -->
+<link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const eventos = JSON.parse(`{{ asistencias_json | tojson | safe }}`);
+
+    // 👇 Nuevo
+    const fechaIngreso = "{{ fecha_ingreso }}";   // YYYY-MM-DD
+    const hoyISO = new Date().toISOString().split("T")[0];
+
+    const calendarEl = document.getElementById("calendar");
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "es",
+        events: eventos,
+
+        dayCellDidMount: function (info) {
+            const diaISO = info.date.toISOString().split("T")[0];
+
+            const tieneAsistencia = eventos.some(e => e.start === diaISO);
+
+            // ⚠️ REGLAS:
+            // - No marcar antes de ingreso
+            // - No marcar hoy
+            // - Solo días pasados
+            const esPasado = diaISO < hoyISO;
+            const esHoy = diaISO === hoyISO;
+            const esAntesIngreso = diaISO < fechaIngreso;
+
+            if (!tieneAsistencia && esPasado && !esHoy && !esAntesIngreso) {
+                info.el.classList.add("inasistencia");
+
+                const label = document.createElement("span");
+                label.textContent = "❌ Inasistencia";
+                label.classList.add("inasistencia-text");
+                info.el.appendChild(label);
+            }
+        }
+    });
+
+    calendar.render();
+});
+
+</script>
+
+<style>
+/* ================================
+   🎨 FULLCALENDAR DARK THEME
+================================ */
+
+/* ---------- Cabecera de días (lun, mar, etc.) ---------- */
+.fc .fc-col-header-cell-cushion {
+    color: #d6d6d6;
+    font-weight: 600;
+    padding: 6px 0;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    letter-spacing: .5px;
+}
+
+
+/* ---------- Celdas del calendario ---------- */
+.fc .fc-daygrid-day {
+    background: #111;
+    border: 1px solid #222;
+    color: #f4f4f4;
+    transition: background .25s ease;
+}
+
+.fc .fc-daygrid-day:hover {
+    background: #181818;
+}
+
+
+/* ---------- Día actual ---------- */
+.fc .fc-daygrid-day.fc-day-today {
+    background: #1e3a5f;
+    
+}
+
+
+/* ---------- Eventos (asistencia) ---------- */
+.fc .fc-daygrid-event {
+    background-color: #22c55e;
+    border-color: #22c55e;
+    color: #111;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+
+/* ---------- Botones FullCalendar ---------- */
+.fc .fc-button {
+    background: #2563eb;
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 6px 12px;
+    transition: background .25s ease;
+}
+
+.fc .fc-button:hover {
+    background: #1d4ed8;
+}
+
+.fc .fc-button-active {
+    background: #1e40af;
+}
+
+
+/* ---------- Días con INASISTENCIA ---------- */
+.fc .fc-daygrid-day.inasistencia {
+    background: #b91c1c;
+    color: #fff;
+    position: relative;
+}
+
+.fc .fc-daygrid-day.inasistencia .inasistencia-text {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 0.65rem;
+    background: rgba(0,0,0,0.35);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+
+
+</style>
+
+{% endblock %}

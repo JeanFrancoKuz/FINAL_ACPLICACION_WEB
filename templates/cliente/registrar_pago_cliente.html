@@ -9,25 +9,46 @@
 
     <div class="cliente-card max-600">
 
+        <!-- ⚠️ IMPORTANTE: enctype="multipart/form-data" -->
         <form method="POST" enctype="multipart/form-data" class="cliente-form">
 
-            <label class="cliente-label">Monto (Bolívares - Bs)</label>
-            <input type="number" step="0.01" name="monto"
-                class="cliente-input"
-                value="{{ monto_sugerido or '' }}" required>
+            <!-- PLAN -->
+            <label class="cliente-label mt-3">Plan</label>
+            <select name="plan" class="cliente-input" required>
+                <option value="">Seleccionar...</option>
+                <option value="PESAS"  {{ 'selected' if plan == 'PESAS' }}>Plan Pesas</option>
+                <option value="FULL"   {{ 'selected' if plan == 'FULL' }}>Plan Full</option>
+                <option value="PROMO"  {{ 'selected' if plan == 'PROMO' }}>Promoción</option>
+            </select>
 
+            <!-- DESCRIPCIÓN -->
+            <label class="cliente-label mt-3">Descripción</label>
+            <textarea name="descripcion" class="cliente-input" rows="2">{{ descripcion or '' }}</textarea>
+
+            <!-- MONTO -->
+            <label class="cliente-label mt-3">Monto (Bs)</label>
+            <input type="number" step="0.01" name="monto"
+                    class="cliente-input"
+                    value="{{ monto_sugerido or '' }}"
+                    required>
+
+            <!-- TIPO DE PAGO -->
             <label class="cliente-label mt-3">Tipo de pago</label>
             <select name="tipo" class="cliente-input" required>
                 <option value="">Seleccionar...</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="zelle">Zelle</option>
-                <option value="pago_movil">Pago móvil</option>
-                <option value="efectivo">Efectivo</option>
+                <option value="EFECTIVO">Efectivo</option>
+                <option value="TRANSFERENCIA">Transferencia / Pago móvil</option>
+                <option value="TARJETA">Tarjeta</option>
             </select>
 
+            <!-- 📸 COMPROBANTE -->
             <label class="cliente-label mt-3">Subir comprobante</label>
-            <input type="file" name="comprobante" class="cliente-input">
+            <input type="file"
+                    name="comprobante"
+                    class="cliente-input"
+                    accept=".jpg,.jpeg,.png,.webp,.gif,.pdf">
 
+            <!-- BOTÓN -->
             <button class="cliente-btn btn-blue mt-4 w-100">
                 ✔ Enviar pago
             </button>
@@ -35,7 +56,6 @@
         </form>
 
     </div>
-
 </div>
 
 {% endblock %}

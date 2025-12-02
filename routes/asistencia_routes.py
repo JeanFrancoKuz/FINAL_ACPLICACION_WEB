@@ -19,12 +19,24 @@ asistencia_bp = Blueprint("asistencia", __name__, url_prefix="/asistencias")
 @roles_required("ADMIN")
 def lista_asistencias():
     page = request.args.get("page", 1, type=int)
-    asistencias = Asistencia.query.order_by(
-        Asistencia.fecha.desc()
-    ).paginate(page=page, per_page=20, error_out=False)
+    fecha_str = request.args.get("fecha", "")
 
-    return render_template("admin/lista_asistencias.html", asistencias=asistencias)
+    query = Asistencia.query.join(Cliente).order_by(Asistencia.fecha.desc())
 
+    # 🔍 Filtro por fecha exacta
+    if fecha_str:
+        try:
+            fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+            query = query.filter(db.func.date(Asistencia.fecha) == fecha)
+        except ValueError:
+            flash("Formato de fecha inválido.", "warning")
+
+    asistencias = query.paginate(page=page, per_page=15)
+
+    return render_template(
+        "admin/lista_asistencias.html",
+        asistencias=asistencias
+    )
 
 # ======================================================
 # 🔹 2) Registrar asistencia — Cliente
@@ -38,7 +50,6 @@ def registrar_asistencia():
 
     cliente = current_user.cliente
 
-    # Evitar duplicado por fecha (conversión correcta a DATE ISO)
     hoy = datetime.now(timezone.utc).date()
 
     existente = (
@@ -49,7 +60,7 @@ def registrar_asistencia():
 
     if existente:
         flash("Ya registraste tu asistencia hoy.", "warning")
-        return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
+        return redirect(url_for("asistencia.historial_asistencias_cliente"))
 
     nueva = Asistencia(cliente_id=cliente.id, fecha=datetime.now(timezone.utc))
 
@@ -61,7 +72,8 @@ def registrar_asistencia():
         db.session.rollback()
         flash(f"Error al guardar asistencia: {e}", "danger")
 
-    return redirect(url_for("cliente.detalles_cliente", id=cliente.id))
+    return redirect(url_for("asistencia.historial_asistencias_cliente"))
+
 
 
 # ======================================================
@@ -77,8 +89,23 @@ def historial_asistencias_cliente():
         .all()
     )
 
-    return render_template("cliente/historial_asistencias.html", asistencias=asistencias)
+    # Convertimos asistencias → FullCalendar JSON
+    asistencias_json = [
+        {
+            "title": "Asistencia",
+            "start": a.fecha.date().isoformat(),   # YYYY-MM-DD
+        }
+        for a in asistencias
+    ]
 
+    # 🔥 NUEVO: fecha de ingreso
+    fecha_ingreso = current_user.cliente.fecha_ingreso.isoformat()
+
+    return render_template(
+        "cliente/historial_asistencias.html",
+        asistencias_json=asistencias_json,
+        fecha_ingreso=fecha_ingreso,   # 👈 NUEVO
+    )
 
 # ======================================================
 # 🔹 4) Historial admin por cliente
@@ -110,3 +137,23 @@ def eliminar_asistencia(id):
         flash(f"No se pudo eliminar: {e}", "danger")
 
     return redirect(url_for("asistencia.lista_asistencias"))
+
+@asistencia_bp.route("/historial/json")
+@login_required
+@roles_required("CLIENTE")
+def historial_asistencias_json():
+    asistencias = (
+        Asistencia.query
+        .filter_by(cliente_id=current_user.cliente.id)
+        .order_by(Asistencia.fecha.asc())
+        .all()
+    )
+
+    eventos = []
+    for a in asistencias:
+        eventos.append({
+            "title": "✔ Asistencia",
+            "start": a.fecha.strftime("%Y-%m-%d")
+        })
+
+    return eventos

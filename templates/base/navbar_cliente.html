@@ -23,16 +23,11 @@
         </a></li>
 
         {# ===============================
-           ⬇️ ESTA ES LA LÍNEA QUE CAMBIAMOS
-           =============================== #}
+        ⬇️ ESTA ES LA LÍNEA QUE CAMBIAMOS
+        =============================== #}
         <li><a href="{{ url_for('pago.pagos_cliente') }}"
             class="{% if 'pagos_cliente' in request.endpoint %}active-cliente{% endif %}">
             Pagos
-        </a></li>
-
-        <li><a href="{{ url_for('progreso.historial_progreso') }}"
-            class="{% if 'progreso' in request.endpoint %}active-cliente{% endif %}">
-            Progreso
         </a></li>
 
         <li><a href="{{ url_for('asistencia.historial_asistencias_cliente') }}"

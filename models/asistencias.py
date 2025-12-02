@@ -3,14 +3,16 @@ Modelo: Asistencia
 ------------------
 Registro de acceso del cliente al gimnasio.
 
-✔ Evita asistencia duplicada en el mismo día
-✔ Serialización lista para API/Front
-✔ Relación directa con Cliente
+Características:
+✔ Evita asistencia duplicada el mismo día por cliente
+✔ Validación estricta de datos
 ✔ Utilidades para reportes mensuales
+✔ Serialización lista para APIs
+✔ Modelo simple, escalable y robusto
 """
 
 from datetime import datetime, date
-from typing import Dict
+from typing import Dict, Optional
 from sqlalchemy.orm import validates, Mapped, mapped_column, relationship
 from sqlalchemy import func
 from extensions import db
@@ -19,8 +21,11 @@ from extensions import db
 class Asistencia(db.Model):
     __tablename__ = "asistencias"
 
-    # ------------------- Datos Base -------------------
+    # =======================================================
+    # 📌 DATOS PRINCIPALES
+    # =======================================================
     id: Mapped[int] = mapped_column(primary_key=True)
+
     fecha: Mapped[datetime] = mapped_column(
         db.DateTime(timezone=True),
         default=db.func.now(),
@@ -28,39 +33,77 @@ class Asistencia(db.Model):
         index=True
     )
 
-    # ------------------- Relación Cliente -------------------
+    # =======================================================
+    # 📌 RELACIÓN CON CLIENTE
+    # =======================================================
     cliente_id: Mapped[int] = mapped_column(
-        db.Integer, db.ForeignKey("clientes.id", ondelete="CASCADE"),
-        nullable=False, index=True
+        db.Integer,
+        db.ForeignKey("clientes.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
     )
+
     cliente = relationship("Cliente", back_populates="asistencias", lazy="select")
 
-    # ------------------- Restricción Anti-Duplicado -------------------
-    __table_args__ = (
-        db.UniqueConstraint("cliente_id", "fecha", name="uq_cliente_fecha"),
+    # =======================================================
+    # 📌 DATOS OPCIONALES (Útiles en reportes)
+    # =======================================================
+    tipo: Mapped[Optional[str]] = mapped_column(
+        db.String(50),
+        default="ENTRENAMIENTO",
+        index=True
     )
 
+    observacion: Mapped[Optional[str]] = mapped_column(
+        db.String(255),
+        nullable=True
+    )
 
-    # ---------------- VALIDACIONES ---------------- #
+    # =======================================================
+    # 🚫 RESTRICCIÓN ANTI-DUPLICADO
+    # =======================================================
+    __table_args__ = (
+        db.UniqueConstraint(
+            "cliente_id",
+            "fecha",
+            name="uq_asistencia_cliente_fecha"
+        ),
+    )
+
+    # =======================================================
+    # ✔ VALIDACIONES
+    # =======================================================
     @validates("fecha")
     def validar_fecha(self, _, value):
-        if value is None:
-            raise ValueError("La fecha de asistencia no puede ser nula.")
+        if not value:
+            raise ValueError("La fecha de asistencia no puede estar vacía.")
         return value
 
     @validates("cliente_id")
     def validar_cliente(self, _, value):
         if not value:
-            raise ValueError("cliente_id es obligatorio.")
+            raise ValueError("Debe especificarse un cliente.")
         return value
 
+    @validates("tipo")
+    def validar_tipo(self, _, value):
+        tipos_validos = {
+            "ENTRENAMIENTO",
+            "PESAS",
+            "CARDIO",
+            "CLASE"
+        }
+        return value if value in tipos_validos else "ENTRENAMIENTO"
 
-    # ---------------- MÉTODOS DE NEGOCIO ---------------- #
+    # =======================================================
+    # ⚙ MÉTODOS DE NEGOCIO
+    # =======================================================
+
     @classmethod
-    def registrar(cls, cliente_id:int) -> "Asistencia":
+    def registrar(cls, cliente_id: int, tipo: str = "ENTRENAMIENTO", observ: str = None):
         """
-        Crea asistencia si aún no existe en el día.
-        Evita errores por duplicados sin romper la app.
+        Registra asistencia si no existe otra hoy.
+        Devuelve la asistencia existente si ya estaba registrada.
         """
         hoy = date.today()
 
@@ -70,30 +113,46 @@ class Asistencia(db.Model):
         ).first()
 
         if existente:
-            return existente  # No genera error, devuelve la existente
+            return existente  # No revienta la app 👍
 
-        nueva = cls(cliente_id=cliente_id)
+        nueva = cls(
+            cliente_id=cliente_id,
+            tipo=tipo,
+            observacion=observ
+        )
+
         db.session.add(nueva)
         db.session.commit()
         return nueva
 
 
     @classmethod
-    def asistencias_del_mes(cls, cliente_id:int, mes:int, anio:int) -> int:
-        """Devuelve el total de asistencias en un mes específico."""
+    def asistencias_mes(cls, cliente_id: int, mes: int, anio: int) -> int:
+        """Cantidad total de asistencias en un mes y año."""
         return cls.query.filter(
             cls.cliente_id == cliente_id,
-            func.extract('month', cls.fecha) == mes,
-            func.extract('year', cls.fecha) == anio
+            func.extract("month", cls.fecha) == mes,
+            func.extract("year", cls.fecha) == anio
         ).count()
 
 
-    # ---------------- SERIALIZACIÓN ---------------- #
-    def to_dict(self, include_cliente=False) -> Dict:
+    @classmethod
+    def ultima_asistencia(cls, cliente_id: int):
+        """Devuelve la última fecha de asistencia del cliente."""
+        return cls.query.filter_by(cliente_id=cliente_id).order_by(cls.fecha.desc()).first()
+
+
+    # =======================================================
+    # 🧾 SERIALIZACIÓN
+    # =======================================================
+
+    def to_dict(self, include_cliente: bool = False) -> Dict:
         data = {
             "id": self.id,
             "fecha": self.fecha.isoformat(),
-            "cliente_id": self.cliente_id
+            "cliente_id": self.cliente_id,
+            "tipo": self.tipo,
+            "observacion": self.observacion
         }
         if include_cliente and self.cliente:
             data["cliente"] = {
@@ -102,7 +161,10 @@ class Asistencia(db.Model):
             }
         return data
 
-    # ---------------- REPRESENTACIÓN ---------------- #
+    # =======================================================
+    # 🧿 REPRESENTACIÓN
+    # =======================================================
+
     def __repr__(self):
-        fecha = self.fecha.strftime("%d/%m/%Y %H:%M")
-        return f"<Asistencia id={self.id} Cliente={self.cliente_id} | {fecha}>"
+        fecha = self.fecha.astimezone().strftime("%d/%m/%Y %H:%M")
+        return f"<Asistencia Cliente={self.cliente_id} | {fecha} | {self.tipo}>"

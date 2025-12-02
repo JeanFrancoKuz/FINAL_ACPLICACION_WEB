@@ -6,6 +6,28 @@
 
 <h2 class="sect-title">Registro de Asistencias</h2>
 
+<!-- ================== FILTRO POR FECHA ================== -->
+<div class="card-dark mb-3">
+    <form method="GET" class="filter-row">
+
+        <input type="date" name="fecha"
+                value="{{ request.args.get('fecha','') }}"
+                class="filter-date">
+
+        <button type="submit" class="btn-filter">
+            🔍 Buscar
+        </button>
+
+        {% if request.args.get('fecha') %}
+        <a href="{{ url_for('asistencia.lista_asistencias') }}"
+            class="btn-filter" style="background:#444;color:#fff;">
+            ✖ Limpiar
+        </a>
+        {% endif %}
+
+    </form>
+</div>
+
 <div class="table-box">
     <table class="admin-table">
         <thead>

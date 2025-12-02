@@ -1026,3 +1026,193 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         font-size:1.6rem;
     }
 }
+
+/******************************************************
+========== 💸 ADMIN — MINI CARDS BCV ==================
+******************************************************/
+
+/* CONTENEDOR SUPERIOR (cliente + mini cards en fila) */
+.pago-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+/* ----- Caja cliente (izquierda) ----- */
+.pago-cliente-box {
+    background: #1a1a1a;
+    padding: 18px 22px;
+    border-radius: 14px;
+    box-shadow: 0 0 18px rgba(0,0,0,.55);
+    color: #fff;
+    max-width: 350px;
+    flex: 1;
+}
+
+.pago-cliente-box h5 {
+    font-size: 1.12rem;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+/* ----- MINI CARDS DERECHA ----- */
+.pago-mini-cards {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* Tarjetita base */
+.mini-card, 
+.mini-card-btn {
+    background: #141414;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,.45);
+    padding: 12px 14px;
+    color: #fff;
+    min-width: 110px;
+    text-align: center;
+}
+
+/* Solo la de BCV fija */
+.mini-card {
+    pointer-events: none;
+}
+
+/* Textos mini */
+.mini-title {
+    display: block;
+    font-size: .78rem;
+    font-weight: 800;
+    color: #ffd300;
+    margin-bottom: 2px;
+}
+
+.mini-value {
+    font-size: .98rem;
+    font-weight: 900;
+    color: #42ff78;
+}
+
+/* Botoncitos al lado */
+.mini-card-btn {
+    border: none;
+    cursor: pointer;
+    font-size: .85rem;
+    font-weight: 900;
+    transition: .25s;
+}
+
+.mini-card-btn:hover {
+    background: #00c9ff;
+    color: #000;
+}
+
+/******************************************************
+=========== 📱 RESPONSIVE — MINI CARDS =================
+******************************************************/
+
+@media(max-width: 800px) {
+
+    .pago-header-row {
+        flex-direction: column;
+    }
+
+    .pago-mini-cards {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .mini-card, .mini-card-btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media(max-width: 500px) {
+
+    .pago-mini-cards {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .mini-card, .mini-card-btn {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+/******************************************************
+=========== Lista asistencia =================
+******************************************************/
+.filter-date {
+    background:#1a1a1a;
+    padding:9px;
+    border-radius:8px;
+    border:none;
+    color:#eaeaea;
+    width:200px;
+}
+
+.filter-date:focus {
+    border:1px solid #00c9ff;
+    box-shadow:0 0 8px rgba(0,201,255,.45);
+}
+
+
+.moneda-switch {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.btn-moneda {
+    background: #333;
+    color: #fff;
+    font-weight: 900;
+    border-radius: 8px;
+    padding: 9px 18px;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-moneda.active {
+    background: #00c9ff;
+    color: #000;
+}
+
+.report-valor {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffd300;
+}
+
+.report-tasa {
+    font-size: .9rem;
+    color: #bbb;
+}
+
+.report-download {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-descargar {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-descargar:hover {
+    background: #00ffaa;
+    color: #000;
+    border-color: #00ffaa;
+}

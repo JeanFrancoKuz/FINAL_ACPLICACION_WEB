@@ -27,7 +27,7 @@ PLANES
 
         <ul class="plan-list">
             <li>✔ Acceso ilimitado a zona de pesas</li>
-            <li>✔ Sauna y vapor incluidos</li>
+            <li>✔ Entrenamiento personalizados</li>
             <li>✔ Áreas especiales</li>
         </ul>
 
@@ -36,7 +36,7 @@ PLANES
             <span id="plan30Bs">Cargando...</span>
         </div>
 
-        <button class="plan-btn" onclick="irAPago(30)">
+        <button class="plan-btn" onclick="irAPago(30,'PESAS','Acceso a zona de pesas')">
             Elegir plan
         </button>
     </div>
@@ -49,7 +49,7 @@ PLANES
         <ul class="plan-list">
             <li>✔ Todo del plan pesas</li>
             <li>✔ Sauna + vapor</li>
-            <li>✔ Áreas especiales + clases fitness</li>
+            <li>✔ Clases fitness</li>
         </ul>
 
         <div class="plan-precio">
@@ -57,19 +57,20 @@ PLANES
             <span id="plan35Bs">Cargando...</span>
         </div>
 
-        <button class="plan-btn" onclick="irAPago(35)">
+        <button class="plan-btn" onclick="irAPago(35,'FULL','Plan full mensual')">
             Elegir plan
         </button>
     </div>
+
 
 </div>
 
 
 <!-- =====================
-  BOTÓN MANUAL
+BOTÓN MANUAL
 ===================== -->
 <div class="manual-pay">
-    <a href="{{ url_for('pago.registrar_pago_cliente_auto') }}" class="manual-btn">
+    <a href="{{ url_for('pago.registrar_pago_cliente') }}" class="manual-btn">
         Registrar pago manualmente
     </a>
 </div>
@@ -79,7 +80,7 @@ PLANES
 
 
 <!-- =====================
-  HISTORIAL RECIENTE
+HISTORIAL RECIENTE
 ===================== -->
 
 <h3 class="cliente-card-title c-blue mt-4">Historial reciente</h3>
@@ -88,7 +89,8 @@ PLANES
 <table class="cliente-table mt-3">
     <thead>
         <tr>
-            <th>Monto</th>
+            <th>Monto (Bs)</th>
+            <th>Plan</th>
             <th>Fecha</th>
             <th>Estado</th>
         </tr>
@@ -96,8 +98,18 @@ PLANES
     <tbody>
         {% for pago in pagos[:3] %}
         <tr>
-            <td>{{ pago.monto }}Bs</td>
+            <td class="c-green fw-bold">{{ pago.monto }} Bs</td>
+
+            <td>
+                {% if pago.plan %}
+                    {{ pago.plan.value }}
+                {% else %}
+                    <span class="cliente-text">N/D</span>
+                {% endif %}
+            </td>
+
             <td>{{ pago.fecha_pago.strftime('%d-%m-%Y') }}</td>
+
             <td>
                 <span class="cliente-badge
                     {% if pago.estado.name == 'PENDIENTE' %} warning
@@ -119,6 +131,7 @@ PLANES
 {% else %}
 <p class="cliente-text mt-3">No hay pagos registrados.</p>
 {% endif %}
+
 
 
 
@@ -153,15 +166,19 @@ async function obtenerDolar() {
 
 obtenerDolar();
 
-function irAPago(montoUSD) {
-    if (!tasaGlobal) {
-        // si no hay conversión → enviamos solo USD
-        window.location.href = `/pagos/registrar?usd=${montoUSD}`;
-        return;
+function irAPago(montoUSD, plan, desc) {
+    let url = "{{ url_for('pago.registrar_pago_cliente') }}";
+
+    if (tasaGlobal) {
+        const montoBs = (montoUSD * tasaGlobal).toFixed(2);
+        url += `?bs=${montoBs}&plan=${plan}&desc=${encodeURIComponent(desc)}`;
+    } else {
+        url += `?plan=${plan}&desc=${encodeURIComponent(desc)}`;
     }
-    const montoBs = (montoUSD * tasaGlobal).toFixed(2);
-    window.location.href = `/pagos/registrar?usd=${montoUSD}&bs=${montoBs}`;
+
+    window.location.href = url;
 }
+
 </script>
 
 {% endblock %}
