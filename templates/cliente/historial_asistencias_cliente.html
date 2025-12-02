@@ -1,0 +1,53 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Historial de Asistencias{% endblock %}
+
+{% block content %}
+
+<h2 class="cliente-title text-center">📋 Historial de asistencias</h2>
+
+<div class="cliente-card mt-4">
+
+{% if asistencias %}
+
+<table class="cliente-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Tipo</th>
+            <th>Comprobante</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for a in asistencias %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ a.fecha.strftime('%d-%m-%Y') }}</td>
+            <td>{{ a.hora.strftime('%H:%M') if a.hora else '--' }}</td>
+            <td>{{ a.tipo.value }}</td>
+
+            <td class="text-center">
+                {% if a.foto %}
+                    <a href="{{ url_for('static', filename=a.foto) }}"
+                        target="_blank"
+                        class="cliente-btn btn-sm btn-blue">
+                        Ver
+                    </a>
+                {% else %}
+                    <span class="cliente-text">Sin archivo</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<p class="cliente-text text-center m-4">No hay asistencias registradas.</p>
+{% endif %}
+
+</div>
+
+{% endblock %}

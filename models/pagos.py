@@ -62,12 +62,8 @@ class Pago(db.Model):
 
     # ───────────────────────── BUSINESS LOGIC ───────────────────────── #
     def validar(self):
-        """Aprueba el pago y activa/renueva membresía si corresponde."""
+        """Aprueba el pago (la membresía se maneja en las rutas, no aquí)."""
         self.estado = EstadoPago.VALIDADO
-
-        # Auto-renovar membresía si es mensualidad
-        if self.tipo == TipoPago.MENSUALIDAD and self.cliente:
-            self.cliente.activar_membresia(30)
 
     def rechazar(self):
         """Rechaza el pago."""

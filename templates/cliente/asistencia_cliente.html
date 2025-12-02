@@ -1,10 +1,29 @@
 {% extends "base/layout_cliente.html" %}
 {% block title %}Asistencias{% endblock %}
+
 {% block content %}
 
-<h2 class="fw-bold mb-3">Asistencias registradas</h2>
+<h2 class="cliente-title text-center">📍 Asistencias</h2>
 
-<table class="table table-dark table-hover">
+
+<!-- =====================
+  TARJETA RESUMEN
+===================== -->
+<div class="cliente-stats-card mt-4">
+    <h3 class="stats-title">Este mes</h3>
+    <p class="stats-number">{{ asistencias_mes }}</p>
+    <small class="cliente-text">Asistencias registradas</small>
+</div>
+
+
+<!-- =====================
+  TABLA PEQUEÑA RECIENTE
+===================== -->
+<h3 class="cliente-card-title c-blue mt-5">Historial reciente</h3>
+
+{% if asistencias %}
+<div class="table-responsive mt-3">
+<table class="cliente-table">
     <thead>
         <tr>
             <th>Fecha</th>
@@ -12,15 +31,23 @@
         </tr>
     </thead>
     <tbody>
-    {% for a in asistencias %}
+    {% for a in asistencias[:5] %}
         <tr>
             <td>{{ a.fecha.strftime('%d-%m-%Y') }}</td>
-            <td>{{ a.hora.strftime('%H:%M') }}</td>
+            <td>{{ a.fecha.strftime('%H:%M') }}</td>
         </tr>
-    {% else %}
-        <tr><td colspan="2" class="text-center">Sin asistencias aún</td></tr>
     {% endfor %}
     </tbody>
 </table>
+</div>
+
+<a href="{{ url_for('asistencia.historial_asistencias_cliente') }}"
+   class="cliente-btn btn-blue mt-3">
+    Ver historial completo →
+</a>
+
+{% else %}
+<p class="cliente-text mt-3">No hay asistencias registradas.</p>
+{% endif %}
 
 {% endblock %}

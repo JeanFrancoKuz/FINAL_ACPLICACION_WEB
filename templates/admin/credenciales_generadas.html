@@ -1,22 +1,32 @@
 {% extends "base/layout_admin.html" %}
 {% block title %}Credenciales Generadas{% endblock %}
-{% block content %}
-<div class="mx-auto mt-5" style="max-width:600px">
 
-    <div class="alert alert-success text-center fw-bold">
-        Cliente registrado exitosamente ✔
-    </div>
-    <div class="card shadow p-4">
-        <h4 class="fw-bold mb-3 text-center">Credenciales de acceso del cliente</h4>
-        <p><b>Usuario (correo):</b> <span class="text-primary">{{ usuario }}</span></p>
-        <p><b>Contraseña temporal:</b> <span class="text-danger">{{ password }}</span></p>
-        <hr>
-        <p><b>Membresía válida hasta:</b> <span class="text-success">{{ vence }}</span></p>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-primary px-4">
-                Volver a la lista de clientes
-            </a>
+{% block content %}
+
+<h2 class="sect-title">Credenciales del Cliente</h2>
+
+<div class="cred-container">
+    <div class="cred-box">
+
+        <div class="cred-success">✔ Cliente registrado con éxito</div>
+
+        <p class="cred-subtitle">Datos de acceso</p>
+
+        <div class="cred-item">
+            Usuario: <span class="cred-user">{{ usuario }}</span>
         </div>
+
+        <div class="cred-item">
+            Contraseña Temporal: <span class="cred-pass">{{ password }}</span>
+        </div>
+
+        <div class="cred-item">
+            Membresía válida hasta: <span class="cred-date">{{ vence }}</span>
+        </div>
+
+        <a href="{{ url_for('admin.lista_clientes') }}" class="btn-return">Volver a clientes</a>
+
     </div>
 </div>
+
 {% endblock %}

@@ -3,38 +3,49 @@
 
 {% block content %}
 
-<h2 class="mb-4 fw-bold">Bienvenido, {{ cliente.nombre }}</h2>
+<h2 class="cliente-title">Bienvenido, {{ cliente.nombre }}</h2>
 
-<div class="row g-4">
+<!-- GRID -->
+<div class="cliente-grid">
 
-    <div class="col-md-4">
-        <div class="card bg-dark text-light shadow p-3">
-            <h5>Membresía</h5>
-            <p>Vence: <strong>{{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') }}</strong></p>
-        </div>
+    <!-- CARD MEMBRESÍA -->
+    <div class="cliente-card">
+        <p class="cliente-card-label">Membresía</p>
+        <h2 class="cliente-card-data">
+            {{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') }}
+        </h2>
+        <span class="cliente-tag cliente-tag-blue">Vencimiento</span>
     </div>
 
-    <div class="col-md-4">
-        <div class="card bg-dark text-light shadow p-3">
-            <h5>Asistencias este mes</h5>
-            <h3 class="text-success fw-bold">{{ asistencias_mes }}</h3>
-        </div>
+    <!-- CARD ASISTENCIAS -->
+    <div class="cliente-card">
+        <p class="cliente-card-label">Asistencias este mes</p>
+        <h2 class="cliente-card-data cliente-color-green">
+            {{ asistencias_mes }}
+        </h2>
+        <span class="cliente-tag cliente-tag-green">Actividad</span>
     </div>
 
-    <div class="col-md-4">
-        <div class="card bg-dark text-light shadow p-3">
-            <h5>Pagos pendientes</h5>
-            <h3 class="text-warning fw-bold">{{ pagos_pendientes }}</h3>
-        </div>
+    <!-- CARD PAGOS -->
+    <div class="cliente-card">
+        <p class="cliente-card-label">Pagos pendientes</p>
+        <h2 class="cliente-card-data cliente-color-yellow">
+            {{ pagos_pendientes }}
+        </h2>
+        <span class="cliente-tag cliente-tag-yellow">Estado</span>
     </div>
 
 </div>
 
-<hr class="mt-4">
+<!-- BOTONES DE ACCIÓN -->
+<div class="cliente-actions">
+    <a href="{{ url_for('cliente.registrar_pago_cliente') }}" class="cliente-btn cliente-btn-green">
+        Registrar Pago
+    </a>
 
-<div class="d-flex gap-3">
-    <a href="{{ url_for('cliente.registrar_pago_cliente') }}" class="btn btn-success">Registrar Pago</a>
-    <a href="{{ url_for('cliente.detalles_cliente', id=cliente.id) }}" class="btn btn-primary">Ver Perfil</a>
+    <a href="{{ url_for('cliente.detalles_cliente', id=cliente.id) }}" class="cliente-btn cliente-btn-blue">
+        Ver Perfil
+    </a>
 </div>
 
 {% endblock %}

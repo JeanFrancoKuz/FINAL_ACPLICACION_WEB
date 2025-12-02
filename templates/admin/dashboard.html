@@ -1,65 +1,41 @@
 {% extends "base/layout_admin.html" %}
-{% block title %}Dashboard Administrativo{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Panel General</h2>
-    <span class="badge bg-dark fs-6 p-2">Administrador</span>
-</div>
+<h2 class="dash-title">Panel General</h2>
 
-<div class="row g-4">
+<div class="dash-grid">
 
-    <!-- Clientes Activos -->
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm border-0 text-white bg-primary">
-            <div class="card-body text-center">
-                <h6 class="text-uppercase m-0">Clientes Activos</h6>
-                <h1 class="fw-bold mt-2">{{ clientes_activos }}</h1>
-            </div>
-        </div>
+    <div class="dash-card">
+        <p>Clientes activos</p>
+        <h1>{{ clientes_activos }}</h1>
+        <a class="dash-btn" href="{{ url_for('admin.lista_clientes') }}">Gestionar</a>
     </div>
 
-    <!-- Clientes Vencidos -->
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm border-0 text-white bg-danger">
-            <div class="card-body text-center">
-                <h6 class="text-uppercase m-0">Clientes Vencidos</h6>
-                <h1 class="fw-bold mt-2">{{ clientes_vencidos }}</h1>
-            </div>
-        </div>
+    <div class="dash-card">
+        <p>Clientes vencidos</p>
+        <h1>{{ clientes_vencidos }}</h1>
+        <a class="dash-btn" href="{{ url_for('admin.lista_clientes') }}">Gestionar</a>
     </div>
 
-    <!-- Pagos Registrados -->
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm border-0 text-white bg-success">
-            <div class="card-body text-center">
-                <h6 class="text-uppercase m-0">Pagos Registrados</h6>
-                <h1 class="fw-bold mt-2">{{ pagos_registrados }}</h1>
-            </div>
-        </div>
+    <div class="dash-card">
+        <p>Pagos registrados</p>
+        <h1>{{ pagos_registrados }}</h1>
+        <a class="dash-btn" href="{{ url_for('pago.lista_pagos') }}">Gestionar</a>
     </div>
 
-    <!-- Pagos Pendientes -->
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm border-0 text-white bg-warning">
-            <div class="card-body text-center">
-                <h6 class="text-uppercase m-0">Pagos Pendientes</h6>
-                <h1 class="fw-bold mt-2">{{ pagos_pendientes }}</h1>
-            </div>
-        </div>
+    <div class="dash-card">
+        <p>Pagos pendientes</p>
+        <h1>{{ pagos_pendientes }}</h1>
+        <a class="dash-btn" href="{{ url_for('pago.lista_pagos') }}">Gestionar</a>
     </div>
 
-    <!-- Asistencias Hoy -->
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card shadow-sm border-0 text-white bg-info">
-            <div class="card-body text-center">
-                <h6 class="text-uppercase m-0">Asistencias Hoy</h6>
-                <h1 class="fw-bold mt-2">{{ asistencias_hoy }}</h1>
-            </div>
-        </div>
+    <div class="dash-card">
+        <p>Asistencias hoy</p>
+        <h1>{{ asistencias_hoy }}</h1>
+        <a class="dash-btn" href="{{ url_for('asistencia.lista_asistencias') }}">Gestionar</a>
     </div>
 
 </div>
-
 {% endblock %}

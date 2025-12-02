@@ -1,69 +1,33 @@
-<!-- ▓▓ NAVBAR ADMIN - HITO ALL SPORT ▓▓ -->
-<nav class="navbar navbar-expand-lg navbar-admin px-4 fixed-top py-3 shadow-sm">
-    <div class="container-fluid">
+<nav class="admin-nav">
 
-        <!-- LOGO -->
-        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold"
-            href="{{ url_for('admin.dashboard_admin') }}">
-            🏋️‍♂️ HITO ADMIN
-        </a>
-
-        <!-- TOGGLE MOVIL -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- MENU -->
-        <div class="collapse navbar-collapse" id="navbarAdmin">
-
-            <!-- SECCIONES -->
-            <ul class="navbar-nav me-auto gap-2 gap-lg-4 pt-3 pt-lg-0">
-
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'dashboard_admin' in request.endpoint %}active-admin{% endif %}"
-                        href="{{ url_for('admin.dashboard_admin') }}">
-                        📊 Dashboard
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'lista_clientes' in request.endpoint %}active-admin{% endif %}"
-                        href="{{ url_for('admin.lista_clientes') }}">
-                        👥 Clientes
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'pago.' in request.endpoint %}active-admin{% endif %}"
-                        href="{{ url_for('pago.lista_pagos') }}">
-                        💳 Pagos
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'asistencia.' in request.endpoint %}active-admin{% endif %}"
-                        href="{{ url_for('asistencia.lista_asistencias') }}">
-                        📅 Asistencias
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'reportes.' in request.endpoint %}active-admin{% endif %}"
-                        href="{{ url_for('reportes.reporte_general') }}">
-                        📑 Reportes
-                    </a>
-                </li>
-
-            </ul>
-
-            <!-- USUARIO + LOGOUT -->
-            <div class="d-flex align-items-center gap-3 pt-3 pt-lg-0">
-                <span class="user-name fw-semibold text-white">👤 {{ current_user.nombre }}</span>
-                <form action="{{ url_for('auth.logout') }}" method="POST">
-                    <button class="btn-logout-admin px-3 fw-bold">🚪 Salir</button>
-                </form>
-            </div>
-
-        </div>
+    <div class="admin-left">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" class="admin-logo">
+        <span class="admin-title">HITO PANEL</span>
     </div>
+
+    <button class="nav-toggle" id="nav-toggle-admin">☰</button>
+
+    <ul class="admin-links" id="nav-links-admin">
+        <li><a href="{{ url_for('admin.dashboard_admin') }}" class="{% if 'dashboard' in request.endpoint %}active{% endif %}">Dashboard</a></li>
+        <li><a href="{{ url_for('admin.lista_clientes') }}" class="{% if 'clientes' in request.endpoint %}active{% endif %}">Clientes</a></li>
+        <li><a href="{{ url_for('pago.lista_pagos') }}" class="{% if 'pago' in request.endpoint %}active{% endif %}">Pagos</a></li>
+        <li><a href="{{ url_for('asistencia.lista_asistencias') }}" class="{% if 'asistencia' in request.endpoint %}active{% endif %}">Asistencias</a></li>
+        <li><a href="{{ url_for('reportes.reporte_general') }}" class="{% if 'reportes' in request.endpoint %}active{% endif %}">Reportes</a></li>
+
+        <!-- 🔥 Logout visible solo en móvil -->
+        <li class="nav-mobile-logout">
+            <form action="{{ url_for('auth.logout') }}" method="POST">
+                <button class="logout-btn nav-mobile-logout-btn">Salir</button>
+            </form>
+        </li>
+    </ul>
+
+    <!-- 🔥 Logout normal (desktop) -->
+    <div class="admin-user">
+        👤 {{ current_user.nombre }}
+        <form action="{{ url_for('auth.logout') }}" method="POST">
+            <button class="logout-btn">Salir</button>
+        </form>
+    </div>
+
 </nav>

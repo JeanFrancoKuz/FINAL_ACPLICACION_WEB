@@ -5,36 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Panel Administrativo{% endblock %}</title>
 
-    <!-- CSS en orden correcto -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- UI global -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"> <!-- Opcional extra -->
+    <!-- IMPORTACIONES -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 
-<body class="app-dark admin-panel">
-    <!-- 🔥 NAVBAR ADMIN -->
-    {% include 'base/navbar_admin.html' %}
+    <body class="admin-body">
 
-    <!-- 💬 FLASH + Contenido -->
-    <main class="container dashboard-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show glow-alert" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {% include "base/navbar_admin.html" %}
 
-        {% block content %}{% endblock %}
-    </main>
+        <main class="admin-main">
+            {% block content %}{% endblock %}
+        </main>
 
-    <!-- 🔻 FOOTER -->
-    {% include 'base/footer_dashboard.html' %}
-
-    <!-- JS -->
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-</body>
+        {% include "base/footer_admin.html" %}
+        <script>
+            const toggleA = document.getElementById("nav-toggle-admin");
+            const menuA   = document.getElementById("nav-links-admin");
+            toggleA?.addEventListener("click",()=>menuA.classList.toggle("open"));
+            document.querySelectorAll("#nav-links-admin a")
+                .forEach(a=>a.addEventListener("click",()=>menuA.classList.remove("open")));
+        </script>
+    </body>
 </html>

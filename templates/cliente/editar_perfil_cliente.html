@@ -3,62 +3,54 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Editar Información Personal</h2>
-    <a href="{{ url_for('cliente.detalles_cliente', id=cliente.id) }}" class="btn btn-outline-light btn-sm">
-        ← Volver al Perfil
-    </a>
-</div>
+<h2 class="cliente-title">Editar Perfil</h2>
 
-<div class="card bg-dark text-light border border-secondary shadow-lg">
-    <div class="card-body">
+<form method="POST" enctype="multipart/form-data" class="cliente-profile-edit-form">
 
-        <form method="POST" class="row g-4">
+    <!-- FOTO + INPUT -->
+    <div class="cliente-edit-photo-wrapper">
 
-            <!-- Nombre -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Nombre completo</label>
-                <input type="text" name="nombre" class="form-control bg-secondary text-white border-0"
-                        value="{{ cliente.nombre }}" required>
-            </div>
+        {% if cliente.foto_perfil %}
+            <img src="{{ url_for('static', filename=cliente.foto_perfil) }}"
+                 class="cliente-edit-photo">
+        {% else %}
+            <img src="{{ url_for('static', filename='img/placeholder_profile.png') }}"
+                 class="cliente-edit-photo">
+        {% endif %}
 
-            <!-- Correo -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Correo electrónico</label>
-                <input type="email" name="correo" class="form-control bg-secondary text-white border-0"
-                        value="{{ cliente.correo or '' }}" placeholder="mail@ejemplo.com">
-            </div>
-
-            <!-- Teléfono -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Teléfono</label>
-                <input type="text" name="telefono" class="form-control bg-secondary text-white border-0"
-                        value="{{ cliente.telefono or '' }}" placeholder="Ej. 0412-1234567">
-            </div>
-
-            <!-- Cambio de contraseña -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Cambiar contraseña (opcional)</label>
-                <input type="password" name="password" class="form-control bg-secondary text-light border-0"
-                        placeholder="Nueva contraseña">
-                <small class="text-muted fst-italic">Déjalo vacío si no deseas cambiarla.</small>
-            </div>
-
-            <div class="col-12"><hr class="border-secondary"></div>
-
-            <div class="col-12 text-end">
-                <button class="btn btn-success px-4 fw-semibold">
-                    Guardar cambios ✔
-                </button>
-            </div>
-        </form>
+        <label class="cliente-file-label">
+            📷 Subir nueva foto
+            <input type="file" name="foto" accept="image/*" class="cliente-file-input">
+        </label>
 
     </div>
-</div>
 
-<style>
-    input::placeholder { color:#cfcfcf!important; opacity: .7; }
-    input:focus { box-shadow:0 0 6px #00ff9d!important; }
-</style>
+
+    <!-- CAMPOS DE TEXTO -->
+    <div class="cliente-edit-fields">
+
+        <label>Nombre completo</label>
+        <input type="text" name="nombre" value="{{ cliente.nombre }}" required>
+
+        <label>Correo electrónico</label>
+        <input type="email" name="correo" value="{{ cliente.correo or '' }}">
+
+        <label>Teléfono</label>
+        <input type="text" name="telefono" value="{{ cliente.telefono or '' }}">
+
+        <label>Nueva contraseña (opcional)</label>
+        <input type="password" name="password" placeholder="••••••••">
+
+    </div>
+
+
+    <!-- BOTONES -->
+    <div class="cliente-edit-actions">
+        <button class="cliente-btn btn-green">✔ Guardar cambios</button>
+        <a href="{{ url_for('cliente.detalles_cliente', id=cliente.id) }}" 
+            class="cliente-btn btn-red">✖ Cancelar</a>
+    </div>
+
+</form>
 
 {% endblock %}

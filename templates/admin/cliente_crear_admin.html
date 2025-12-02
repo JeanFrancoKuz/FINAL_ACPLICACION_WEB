@@ -1,79 +1,61 @@
 {% extends "base/layout_admin.html" %}
-{% block title %}Registrar Cliente{% endblock %}
+{% block title %} Registrar Cliente {% endblock %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Registrar Nuevo Cliente</h2>
-    <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-outline-secondary">
-        Volver
-    </a>
-</div>
+<h2 class="sect-title">Registrar nuevo cliente</h2>
 
-<div class="card shadow-sm">
-    <div class="card-body">
+<a href="{{ url_for('admin.lista_clientes') }}" class="btn-back">◀ Volver</a>
 
-        <form action="{{ url_for('admin.crear_cliente') }}" method="POST" enctype="multipart/form-data" class="row g-3">
+<div class="form-box">
 
-            <!-- 🧍 Datos Personales -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Nombre Completo</label>
-                <input type="text" name="nombre" class="form-control" required placeholder="Ej: Carlos Rivas">
+    <form action="{{ url_for('admin.crear_cliente') }}" method="POST" enctype="multipart/form-data">
+
+        <!-- NOMBRE -->
+        <label>Nombre Completo</label>
+        <input type="text" name="nombre" required placeholder="Nombre y Apellido">
+
+        <!-- CORREO -->
+        <label>Correo Electrónico</label>
+        <input type="email" name="correo" required placeholder="Correo@dominio.com">
+
+        <!-- CEDULA -->
+        <label>Cédula</label>
+        <input type="text" name="cedula" required placeholder="123456789">
+
+        <!-- TELEFONO -->
+        <label>Teléfono</label>
+        <input type="text" name="telefono" required placeholder="+58 412-1234567">
+
+        <!-- ESTADO -->
+        <label>Estado Membresía</label>
+        <select name="estado_membresia" required>
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="SUSPENDIDO">SUSPENDIDO</option>
+            <option value="VENCIDO">VENCIDO</option>
+        </select>
+
+        <!-- FECHAS -->
+        <div class="two-cols">
+            <div>
+                <label>Fecha de Ingreso</label>
+                <input type="date" name="fecha_ingreso" required>
             </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Correo Electrónico</label>
-                <input type="email" name="correo" class="form-control" required placeholder="correo@dominio.com">
+            <div>
+                <label>Vencimiento</label>
+                <input type="date" name="membresia_vencimiento">
             </div>
+        </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Cédula</label>
-                <input type="text" name="cedula" class="form-control" required placeholder="V-12345678">
-            </div>
+        <!-- BOTONES -->
+        <div class="form-btns">
+            <button type="submit" class="btn-save">Guardar</button>
+            <a href="{{ url_for('admin.lista_clientes') }}" class="btn-cancel">Cancelar</a>
+        </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Teléfono</label>
-                <input type="text" name="telefono" class="form-control" required placeholder="+58 412-1234567">
-            </div>
-
-            <!-- 📅 Membresía -->
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Estado de Membresía</label>
-                <select name="estado_membresia" class="form-select" required>
-                    <option value="ACTIVO">ACTIVO</option>
-                    <option value="INACTIVO">INACTIVO</option>
-                    <option value="PENDIENTE">PENDIENTE</option>
-                    <option value="SUSPENDIDO">SUSPENDIDO</option>
-                    <option value="VENCIDO">VENCIDO</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Fecha de Ingreso</label>
-                <input type="date" name="fecha_ingreso" class="form-control" required>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Vencimiento Membresía</label>
-                <input type="date" name="membresia_vencimiento" class="form-control">
-            </div>
-
-            <!-- 📷 Imagen -->
-            <div class="col-12">
-                <label class="form-label fw-semibold">Foto de Perfil (Opcional)</label>
-                <input type="file" name="foto_perfil" class="form-control" accept="image/*">
-                <small class="text-muted">Formatos permitidos: JPG - PNG</small>
-            </div>
-
-            <!-- Botones -->
-            <div class="text-end mt-4">
-                <button class="btn btn-primary px-4" type="submit">Guardar Cliente</button>
-                <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-secondary">Cancelar</a>
-            </div>
-
-        </form>
-
-    </div>
+    </form>
 </div>
 
 {% endblock %}

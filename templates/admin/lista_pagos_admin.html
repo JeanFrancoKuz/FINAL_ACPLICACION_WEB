@@ -3,39 +3,29 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Gestión de Pagos</h2>
-    <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=0) }}" class="btn btn-primary">
-        + Registrar Pago
-    </a>
-</div>
+<h2 class="sect-title">Gestión de Pagos</h2>
 
-<!-- ================== FILTRO ================== -->
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <form method="GET" class="row g-2 align-items-center">
-            <div class="col-auto">
-                <label class="fw-semibold">Estado:</label>
-            </div>
-            <div class="col-md-3">
-                <select name="estado" id="estado" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="PENDIENTE"  {% if request.args.get('estado')=='PENDIENTE' %}selected{% endif %}>Pendiente</option>
-                    <option value="VALIDADO"  {% if request.args.get('estado')=='VALIDADO' %}selected{% endif %}>Validado</option>
-                    <option value="RECHAZADO" {% if request.args.get('estado')=='RECHAZADO' %}selected{% endif %}>Rechazado</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-outline-dark">Filtrar</button>
-            </div>
-        </form>
-    </div>
+<a href="{{ url_for('pago.registrar_pago_admin', cliente_id=0) }}" class="btn-new">+ Registrar Pago</a>
+
+<!-- ================== FILTROS ================== -->
+<div class="card-dark mb-3">
+    <form method="GET" class="filter-row">
+
+        <select name="estado">
+            <option value="">Todos</option>
+            <option value="PENDIENTE"  {{ 'selected' if request.args.get('estado')=='PENDIENTE' else '' }}>Pendiente</option>
+            <option value="VALIDADO"   {{ 'selected' if request.args.get('estado')=='VALIDADO' else '' }}>Validado</option>
+            <option value="RECHAZADO"  {{ 'selected' if request.args.get('estado')=='RECHAZADO' else '' }}>Rechazado</option>
+        </select>
+
+        <button type="submit" class="btn-filter">Filtrar</button>
+    </form>
 </div>
 
 <!-- ================== TABLA ================== -->
-<div class="table-responsive">
-<table class="table table-hover table-striped align-middle shadow-sm">
-    <thead class="table-dark">
+<div class="table-box">
+<table class="admin-table">
+    <thead>
         <tr>
             <th>#</th>
             <th>Cliente</th>
@@ -44,7 +34,7 @@
             <th>Fecha</th>
             <th>Estado</th>
             <th>Comprobantes</th>
-            <th width="240">Acciones</th>
+            <th>Acciones</th>
         </tr>
     </thead>
 
@@ -54,20 +44,16 @@
             <td>{{ loop.index }}</td>
 
             <td>
-                <strong>{{ pago.cliente.nombre }}</strong><br>
-                <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=pago.cliente.id) }}" class="badge bg-primary text-decoration-none" title="Registrar nuevo pago a este cliente">+ Pago</a>
+                <b>{{ pago.cliente.nombre }}</b><br>
+                <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=pago.cliente.id) }}" class="tag-new">+ Pago</a>
             </td>
 
-            <td class="fw-semibold text-success">${{ "%.2f"|format(pago.monto) }}</td>
+            <td class="money">${{ "%.2f"|format(pago.monto) }}</td>
             <td>{{ pago.tipo.value }}</td>
             <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
 
             <td>
-                <span class="badge 
-                    {% if pago.estado.value=='PENDIENTE' %} bg-warning text-dark
-                    {% elif pago.estado.value=='VALIDADO' %} bg-success
-                    {% elif pago.estado.value=='RECHAZADO' %} bg-danger
-                    {% endif %}">
+                <span class="estado estado-{{ pago.estado.value|lower }}">
                     {{ pago.estado.value }}
                 </span>
             </td>
@@ -75,7 +61,7 @@
             <td>
                 {% if pago.fotos %}
                     {% for foto in pago.fotos %}
-                    <a href="{{ url_for('static', filename=foto.ruta) }}" class="text-primary fw-semibold" target="_blank">Ver archivo</a><br>
+                    <a href="{{ url_for('static', filename=foto.ruta) }}" target="_blank" class="link-ver">Ver Archivo</a><br>
                     {% endfor %}
                 {% else %}
                     <span class="text-muted">Sin archivo</span>
@@ -83,31 +69,24 @@
             </td>
 
             <td>
-                <div class="d-flex gap-1 flex-wrap">
 
-                    <a href="{{ url_for('pago.editar_pago_admin', pago_id=pago.id) }}" class="btn btn-warning btn-sm">
-                        Editar
-                    </a>
+                <a href="{{ url_for('pago.editar_pago_admin', pago_id=pago.id) }}" class="btn-a warn">Editar</a>
 
-                    <form action="{{ url_for('pago.eliminar_pago_admin', pago_id=pago.id) }}" method="POST" 
+                <form action="{{ url_for('pago.eliminar_pago_admin', pago_id=pago.id) }}" method="POST" style="display:inline-block;"
                         onsubmit="return confirm('¿Eliminar este pago definitivamente?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
+                    <button class="btn-a danger">Eliminar</button>
+                </form>
 
-                    {% if pago.estado.value=='PENDIENTE' %}
-                    <form action="{{ url_for('pago.validar_pago', pago_id=pago.id) }}" method="POST" class="d-flex gap-1">
-                        <button type="submit" name="accion" value="aprobar" class="btn btn-success btn-sm">Aprobar</button>
-                        <button type="submit" name="accion" value="rechazar" class="btn btn-dark btn-sm">Rechazar</button>
-                    </form>
-                    {% endif %}
-
-                </div>
+                {% if pago.estado.value=='PENDIENTE' %}
+                <form action="{{ url_for('pago.validar_pago', pago_id=pago.id) }}" method="POST" style="display:inline-block;">
+                    <button type="submit" name="accion" value="aprobar" class="btn-a success">Aprobar</button>
+                    <button type="submit" name="accion" value="rechazar" class="btn-a dark">Rechazar</button>
+                </form>
+                {% endif %}
             </td>
         </tr>
         {% else %}
-        <tr>
-            <td colspan="8" class="text-center py-3 text-muted">No hay pagos registrados.</td>
-        </tr>
+        <tr><td colspan="8" class="no-data">No hay pagos registrados.</td></tr>
         {% endfor %}
     </tbody>
 

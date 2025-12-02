@@ -1,47 +1,62 @@
-<!-- Navbar Cliente - HITO ALL SPORT -->
-<nav class="navbar navbar-expand-lg navbar-cliente fixed-top py-3">
-    <div class="container">
-        <!-- LOGO -->
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
-            href="{{ url_for('cliente.dashboard_cliente') }}">
-            🏋 HITO CLIENTE
-        </a>
+<nav class="cliente-nav">
 
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#menuCliente">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="menuCliente">
-            <ul class="navbar-nav ms-auto gap-lg-4">
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'dashboard_cliente' in request.endpoint %}active-cliente{% endif %}"
-                        href="{{ url_for('cliente.dashboard_cliente') }}">
-                        📊 Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'detalles_cliente' in request.endpoint %}active-cliente{% endif %}"
-                        href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}">
-                        👤 Mi Perfil
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'registrar_pago_cliente' in request.endpoint %}active-cliente{% endif %}"
-                        href="{{ url_for('cliente.registrar_pago_cliente') }}">
-                        💳 Registrar Pago
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link hover-underline {% if 'progreso' in request.endpoint %}active-cliente{% endif %}"
-                        href="{{ url_for('progreso.historial_progreso') }}">
-                        📈 Mi Progreso
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
-                        <button class="btn-logout px-3 fw-bold">⛔ Salir</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
+    <!-- IZQUIERDA -->
+    <div class="cliente-left">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" class="cliente-logo">
+        <span class="cliente-title">HITO CLIENTE</span>
     </div>
+
+    <!-- BOTÓN HAMBURGUESA -->
+    <button class="nav-toggle" id="nav-toggle-cliente">☰</button>
+
+    <!-- MENÚ -->
+    <ul class="cliente-links" id="nav-links-cliente">
+
+        <li><a href="{{ url_for('cliente.dashboard_cliente') }}"
+            class="{% if 'dashboard_cliente' in request.endpoint %}active-cliente{% endif %}">
+            Dashboard
+        </a></li>
+
+        <li><a href="{{ url_for('cliente.detalles_cliente', id=current_user.cliente.id) }}"
+            class="{% if 'detalles_cliente' in request.endpoint %}active-cliente{% endif %}">
+            Mi Perfil
+        </a></li>
+
+        {# ===============================
+           ⬇️ ESTA ES LA LÍNEA QUE CAMBIAMOS
+           =============================== #}
+        <li><a href="{{ url_for('pago.pagos_cliente') }}"
+            class="{% if 'pagos_cliente' in request.endpoint %}active-cliente{% endif %}">
+            Pagos
+        </a></li>
+
+        <li><a href="{{ url_for('progreso.historial_progreso') }}"
+            class="{% if 'progreso' in request.endpoint %}active-cliente{% endif %}">
+            Progreso
+        </a></li>
+
+        <li><a href="{{ url_for('asistencia.historial_asistencias_cliente') }}"
+            class="{% if 'asistencia' in request.endpoint %}active-cliente{% endif %}">
+            Asistencias
+        </a></li>
+
+        <!-- 🔥 LOGOUT SOLO MOBILE -->
+        <li class="nav-mobile-logout-client">
+            <form action="{{ url_for('auth.logout') }}" method="POST">
+                <button class="cliente-logout-btn nav-mobile-logout-btn-client">
+                    Salir
+                </button>
+            </form>
+        </li>
+
+    </ul>
+
+    <!-- 🔥 LOGOUT DESKTOP -->
+    <div class="cliente-user">
+        {{ current_user.nombre }}
+        <form action="{{ url_for('auth.logout') }}" method="POST">
+            <button class="cliente-logout-btn">Salir</button>
+        </form>
+    </div>
+
 </nav>

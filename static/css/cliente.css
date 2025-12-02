@@ -1,0 +1,685 @@
+/******************************************************
+============== 🌑 CLIENTE PANEL (CLON ADMIN) ==========
+******************************************************/
+.cliente-body{
+    background:#242222;
+    color:#f2f2f2;
+    font-family:"Montserrat", sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+/******************************************************
+=============== 🔝 NAV CLIENTE (MODO ADMIN) ============
+******************************************************/
+.cliente-nav{
+    width:100%;
+    height:65px;
+    background:#0d0d0d;
+    border-bottom:1px solid #1c1c1c;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+    position:sticky;top:0;z-index:1000;
+}
+
+/* LEFT */
+.cliente-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.cliente-logo{height:38px;border-radius:6px;}
+.cliente-title{
+    font-size:1.15rem;
+    font-weight:900;
+    color:#fff;
+}
+
+/* LINKS */
+.cliente-links{
+    list-style:none;
+    display:flex;
+    gap:30px;
+}
+
+/* Enlaces */
+.cliente-links a{
+    text-decoration:none;
+    font-weight:600;
+    color:#cfcfcf;
+    padding-bottom:4px;
+    transition:.35s;
+}
+
+.cliente-links a:hover{
+    border-bottom:2px solid #00c9ff;
+    color:#00c9ff;
+}
+
+.active-cliente{
+    border-bottom:2px solid #00c9ff;
+    color:#fff;
+}
+
+/* RIGHT USER */
+.cliente-user{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:700;
+}
+.cliente-logout-btn{
+    background:#d40026;
+    color:white;
+    font-weight:800;
+    border:none;
+    padding:6px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.cliente-logout-btn:hover{
+    background:#ffd300;
+    color:#000;
+}
+
+/******************************************************
+=============== 📱 RESPONSIVE =========================
+******************************************************/
+.nav-toggle{
+    display:none;
+    background:none;
+    border:none;
+    font-size:1.6rem;
+    color:#fff;
+    cursor:pointer;
+}
+
+/* 🔥 SOLO MOBILE */
+.nav-mobile-logout-client{
+    display:none;
+}
+
+/* Desktop forced */
+@media(min-width:900px){
+    #nav-links-cliente{ display:flex !important; }
+}
+
+/* Mobile menu */
+@media(max-width:900px){
+    .cliente-links{
+        position:absolute;
+        top:65px;
+        left:0;
+        width:100%;
+        background:#111;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:20px;
+        padding:24px;
+        border-top:1px solid #222;
+        display:none;
+    }
+
+    .cliente-links.open{ display:flex; }
+
+    .nav-toggle{ display:block; }
+
+    .cliente-user{ display:none; }
+
+    .nav-mobile-logout-client{
+        display:block;
+        margin-top:18px;
+    }
+
+    .nav-mobile-logout-btn-client{
+        width:100%;
+        background:#d40026;
+        padding:10px 0;
+        border-radius:6px;
+        font-weight:800;
+    }
+    .nav-mobile-logout-btn-client:hover{
+        background:#ffd300;
+        color:#000;
+    }
+}
+
+/* Medium */
+@media(max-width:1024px){
+    .cliente-nav{ padding:0 18px; }
+    .cliente-links{ gap:18px; }
+    .cliente-title{ font-size:1rem; }
+}
+
+
+/******************************************************
+============== 🟦 DASHBOARD CLIENTE ===================
+******************************************************/
+.cliente-main{
+    padding:95px 40px 60px;
+    flex:1;
+}
+
+.cliente-title{
+    font-size:2rem;
+    font-weight:900;
+    margin-bottom:30px;
+}
+
+/* === GRID TARJETAS === */
+.cliente-grid{
+    display:grid;
+    gap:24px;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+}
+
+.cliente-card{
+    background:#1a1a1a;
+    border-radius:14px;
+    padding:26px;
+    text-align:center;
+    box-shadow:0 0 16px rgba(0,0,0,.55);
+    transition:.35s;
+}
+.cliente-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 0 22px rgba(0,180,255,.35);
+}
+
+.cliente-card-label{
+    color:#00c9ff;
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:.92rem;
+}
+.cliente-card-data{
+    font-size:2.25rem;
+    font-weight:900;
+    color:#fff;
+    margin-bottom:12px;
+}
+
+/******************************************************
+============= BOTONES ESTILO ADMIN ====================
+******************************************************/
+.cliente-actions{
+    margin-top:30px;
+    display:flex;
+    gap:20px;
+}
+
+.cliente-btn{
+    display:inline-block;
+    width:220px;
+    padding:12px 0;
+    border-radius:8px;
+    font-weight:800;
+    text-align:center;
+    text-decoration:none;
+    transition:.35s;
+    font-size:1rem;
+}
+
+/* Colores */
+.cliente-btn-blue{
+    background:#00c9ff;color:#000;
+}
+.cliente-btn-blue:hover{
+    background:#ffd300;color:#000;
+}
+.cliente-btn-green{
+    background:#23ff75;color:#000;
+}
+.cliente-btn-green:hover{
+    background:#16a34a;color:#fff;
+}
+
+/******************************************************
+================ FOOTER CLON ==========================
+******************************************************/
+.footer-cliente{
+    background:#111;
+    padding:40px 0 30px;
+    border-top:2px solid #00c9ff;
+}
+
+.footer-cliente-grid{
+    width:85%;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:45px;
+    padding-bottom:15px;
+}
+
+.footer-cliente-title{
+    color:#ffd300;
+    font-weight:800;
+    margin-bottom:8px;
+}
+.footer-cliente-text,
+.footer-cliente-link{
+    color:#ccc;
+    font-size:.95rem;
+    transition:.25s;
+    display:block;
+    margin-bottom:4px;
+}
+.footer-cliente-link:hover{
+    color:#d40026;
+}
+.footer-cliente-copy{
+    text-align:center;
+    color:#999;
+    font-size:.85rem;
+    margin-top:12px;
+}
+/*************************************
+📌 PERFIL CLIENTE — TARJETA COMPLETA
+*************************************/
+
+.cliente-profile-card{
+    background:#1a1a1a;
+    border-radius:14px;
+    padding:32px;
+    max-width:700px;
+    margin:auto;
+    box-shadow:0 0 18px rgba(0,0,0,.55);
+}
+
+.cliente-profile-photo-wrapper{
+    display:flex;
+    justify-content:center;
+    margin-bottom:25px;
+}
+
+.cliente-profile-photo{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #00c9ff;
+}
+
+.cliente-profile-info p{
+    margin:6px 0;
+    font-size:1rem;
+    color:#e2e2e2;
+}
+
+.cliente-divider{
+    margin:22px 0;
+    border-color:#333;
+}
+
+/******************************************************
+================ Editar cliente ==========================
+******************************************************/
+/********************************************
+🔧 EDICIÓN PERFIL CLIENTE
+*********************************************/
+
+.cliente-profile-edit-form{
+    max-width:750px;
+    margin:auto;
+    background:#1a1a1a;
+    border-radius:14px;
+    padding:30px;
+    box-shadow:0 0 21px rgba(0,0,0,.45);
+}
+
+.cliente-edit-photo-wrapper{
+    text-align:center;
+    margin-bottom:28px;
+
+    /* ⬇ ESTE ES EL TRUCO */
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+}
+
+
+.cliente-edit-photo{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #00c9ff;
+    margin-bottom:12px;
+}
+
+.cliente-file-label{
+    display:inline-block;
+    padding:10px 18px;
+    background:#00c9ff;
+    color:#000;
+    font-weight:700;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.cliente-file-input{
+    display:none;
+}
+
+.cliente-edit-fields{
+    display:grid;
+    gap:18px;
+    margin-bottom:35px;
+}
+
+.cliente-edit-fields label{
+    font-weight:700;
+    color:#eaeaea;
+}
+
+.cliente-edit-fields input{
+    background:#2b2b2b;
+    border:1px solid #444;
+    border-radius:8px;
+    padding:10px;
+    color:#fff;
+    font-size:1rem;
+}
+
+.cliente-edit-fields input:focus{
+    outline:none;
+    border-color:#00ff26;
+    box-shadow:0 0 6px #00c9ff;
+}
+
+.cliente-edit-actions{
+    display:flex;
+    gap:14px;
+}
+
+.btn-red{
+    background:#d40026;
+    color:white;
+}
+
+.btn-red:hover{
+    background:#ff4e4e;
+}
+
+/*****************************************
+🌑 PAGOS CLIENTE
+*****************************************/
+/* TARJETA DÓLAR */
+.plan-dolar-card{
+    background:#0b0e17;
+    border:1px solid #223344;
+    border-radius:14px;
+    text-align:center;
+    padding:28px 10px;
+    margin-bottom:35px;
+}
+.plan-dolar-card h3{
+    color:#66d1ff;
+    font-weight:800;
+    margin-bottom:6px;
+}
+.dolar-precio{
+    font-size:1.8rem;
+    font-weight:900;
+    color:#ffd300;
+}
+
+/* PLANES */
+.planes-container{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+.plan-card{
+    background:#0f1626;
+    border:2px solid #1d2b3a;
+    padding:26px;
+    border-radius:18px;
+    width:350px;
+    box-shadow:0 0 18px rgba(0,0,0,.45);
+}
+.plan-title{
+    font-size:1.2rem;
+    font-weight:900;
+    color:#e7e7e7;
+    margin-bottom:18px;
+}
+.plan-list{
+    list-style:none;
+    padding:0;
+    color:#bfc8d0;
+    font-size:.95rem;
+}
+.plan-list li{ margin-bottom:6px; }
+
+/* PRECIOS */
+.plan-precio{
+    display:flex;
+    justify-content:space-between;
+    margin:15px 0;
+    font-weight:900;
+    font-size:1.1rem;
+}
+.plan-precio strong{ color:#38f3ff; }
+.plan-precio span{ color:#ffd861; }
+
+/* BOTÓN PLAN */
+.plan-btn{
+    width:100%;
+    background:#0078f5;
+    color:#fff;
+    border:none;
+    padding:12px;
+    font-weight:800;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.25s;
+}
+.plan-btn:hover{
+    background:#0ad1ff;
+}
+
+/* PAGO MANUAL */
+.manual-pay{
+    text-align:center;
+    margin-top:30px;
+}
+.manual-btn{
+    display:inline-block;
+    background:#444;
+    color:#eee;
+    padding:8px 18px;
+    border-radius:10px;
+    font-weight:700;
+    text-decoration:none;
+}
+.manual-btn:hover{
+    background:#666;
+}
+
+/* BOTÓN HISTORIAL */
+.historial-btn{
+    display:inline-block;
+    margin-top:14px;
+    color:#ffd300;
+    font-weight:800;
+}
+.historial-btn:hover{
+    color:#fff;
+}
+
+/******************************************************
+ ========== REGISTRAR PAGO (CLIENTE) ==================
+*******************************************************/
+
+.page-center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 30px;
+}
+
+/* Corregir para pantallas pequeñas */
+@media(max-width: 768px){
+    .page-center {
+        padding-top: 10px;
+    }
+}
+
+
+/* Card principal */
+.cliente-card {
+
+    background: #0f1626;
+    border: 1px solid #1e2936;
+    border-radius: 16px;
+    padding: 28px 26px;
+    box-shadow: 0 0 16px rgba(0,0,0,.4);
+    margin-top: 30px;
+}
+
+/* Card tamaño máximo */
+.max-600 {
+    max-width: 600px;
+}
+
+/* Etiquetas */
+.cliente-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #cdd6e3;
+    font-size: .95rem;
+}
+
+/* Inputs */
+.cliente-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #0b0f17;
+    border: 1px solid #243340;
+    border-radius: 10px;
+    color: #e8eef7;
+    font-size: .95rem;
+    outline: none;
+    transition: .25s;
+}
+
+/* Placeholder */
+.cliente-input::placeholder {
+    color: #7e8a96;
+    opacity: .7;
+}
+
+/* Focus */
+.cliente-input:focus {
+    border-color: #1ebfff;
+    box-shadow: 0 0 6px rgba(0,180,255,.45);
+}
+
+/* Separación entre campos */
+.mt-3 { margin-top: 18px; }
+.mt-4 { margin-top: 28px; }
+.w-100 { width: 100%; }
+
+/* Botón enviar */
+.btn-blue {
+    background: #0078f5;
+    border: none;
+    padding: 12px 16px;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: .25s;
+}
+
+/* Hover */
+.btn-blue:hover {
+    background: #0ad1ff;
+    color: #000;
+}
+
+/* Responsive */
+@media(max-width:600px){
+    .cliente-card { padding: 22px 18px; }
+    .cliente-input { font-size: .9rem; }
+}
+
+/******************************************************
+  ========== TABLA DE PAGOS CLIENTE ===================
+******************************************************/
+
+.cliente-card {
+    background: #0f1825;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 0 25px rgba(0,0,0,.3);
+}
+
+/* Tabla */
+.cliente-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.cliente-table thead {
+    background: #111a28;
+}
+
+.cliente-table th,
+.cliente-table td {
+    padding: 12px 10px;
+    text-align: center;
+}
+
+.cliente-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    transition: .2s;
+}
+
+.cliente-table tbody tr:hover {
+    background: rgba(255,255,255,.05);
+}
+
+/* Estado */
+.cliente-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.cliente-badge.success {
+    background: rgba(0,200,80,.2);
+    color: #00e676;
+}
+
+.cliente-badge.warning {
+    background: rgba(255,180,0,.2);
+    color: #ffca28;
+}
+
+.cliente-badge.danger {
+    background: rgba(255,0,80,.2);
+    color: #ff5252;
+}
+
+/* Botón ver archivo */
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+}

@@ -22,7 +22,7 @@ reportes_bp = Blueprint("reportes", __name__, url_prefix="/reportes")
 
 
 # ===========================================================
-# 📊 REPORTE GENERAL (DASHBOARD HTML)
+# 📊 REPORTE GENERAL (Dashboard HTML)
 # ===========================================================
 @reportes_bp.route("/general")
 @login_required
@@ -30,19 +30,19 @@ reportes_bp = Blueprint("reportes", __name__, url_prefix="/reportes")
 def reporte_general():
     try:
         # CLIENTES
-        total_clientes = db.session.query(func.count(Cliente.id)).scalar()
-        activos = db.session.query(func.count()).filter(
-            Cliente.estado_membresia == EstadoMembresia.ACTIVO
-        ).scalar()
-        vencidos = db.session.query(func.count()).filter(
-            Cliente.estado_membresia == EstadoMembresia.VENCIDO
-        ).scalar()
+        total_clientes = Cliente.query.count()
+        activos = Cliente.query.filter_by(estado_membresia=EstadoMembresia.ACTIVO).count()
+        vencidos = Cliente.query.filter_by(estado_membresia=EstadoMembresia.VENCIDO).count()
 
         # PAGOS
-        total_pagos = db.session.query(func.count(Pago.id)).scalar()
+        total_pagos = Pago.query.count()
         pagos_validados = Pago.query.filter_by(estado=EstadoPago.VALIDADO).count()
         pagos_rechazados = Pago.query.filter_by(estado=EstadoPago.RECHAZADO).count()
         pagos_pendientes = Pago.query.filter_by(estado=EstadoPago.PENDIENTE).count()
+
+        # 🔹 TOTAL DE GANANCIAS (solo pagos validados)
+        pagos_validados_lista = Pago.query.filter_by(estado=EstadoPago.VALIDADO).all()
+        total_ganancias = sum(p.monto for p in pagos_validados_lista)
 
         # ASISTENCIAS — MES ACTUAL
         hoy = date.today()
@@ -51,43 +51,69 @@ def reporte_general():
             extract("year", Asistencia.fecha) == hoy.year
         ).count()
 
-        # ASISTENCIAS — POR DÍA DE LA SEMANA
-        asistencias_por_dia = db.session.query(
+        # ASISTENCIAS — POR DÍA
+        asistencias_por_dia_raw = db.session.query(
             extract("dow", Asistencia.fecha).label("dia_semana"),
-            func.count(Asistencia.id).label("total")
+            func.count(Asistencia.id)
         ).filter(
             extract("month", Asistencia.fecha) == hoy.month,
             extract("year", Asistencia.fecha) == hoy.year
         ).group_by("dia_semana").all()
 
         dias_semana = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"]
-        asistencias_dict = {dias_semana[int(r.dia_semana)]: r.total for r in asistencias_por_dia}
+        asistencias_por_dia = {dias_semana[int(dia)]: total for dia, total in asistencias_por_dia_raw}
+
+        # 🔹 GRÁFICO mensual de pagos validados
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+        montos_validados = []
+
+        for m in range(1, 12 + 1):
+            total_mes = db.session.query(func.sum(Pago.monto)).filter(
+                Pago.estado == EstadoPago.VALIDADO,
+                extract("month", Pago.fecha_pago) == m
+            ).scalar() or 0
+            montos_validados.append(float(total_mes))
 
     except Exception as e:
         flash(f"Error generando reporte: {e}", "danger")
-        asistencias_dict = {}
-        total_clientes = activos = vencidos = 0
-        total_pagos = pagos_validados = pagos_rechazados = pagos_pendientes = asistencias_mes = 0    
+        return render_template("admin/reporte_general.html",
+            total_clientes=0, activos=0, vencidos=0,
+            total_pagos=0, pagos_validados=0, pagos_rechazados=0, pagos_pendientes=0,
+            total_ganancias=0,
+            asistencias_mes=0, asistencias_por_dia={},
+            meses=[], montos_validados=[]
+        )
 
     return render_template(
         "admin/reporte_general.html",
-        total_clientes=total_clientes, activos=activos, vencidos=vencidos,
-        total_pagos=total_pagos, pagos_validados=pagos_validados,
-        pagos_rechazados=pagos_rechazados, pagos_pendientes=pagos_pendientes,
+
+        total_clientes=total_clientes,
+        activos=activos,
+        vencidos=vencidos,
+
+        total_pagos=total_pagos,
+        pagos_validados=pagos_validados,
+        pagos_rechazados=pagos_rechazados,
+        pagos_pendientes=pagos_pendientes,
+        total_ganancias=total_ganancias,
+
         asistencias_mes=asistencias_mes,
-        asistencias_por_dia=asistencias_dict
+        asistencias_por_dia=asistencias_por_dia,
+
+        meses=meses,
+        montos_validados=montos_validados
     )
 
 
 # ===========================================================
-# 🧾 DESCARGAR PDF — REPORTE COMPLETO
+# 🧾 DESCARGAR PDF — Reporte General
 # ===========================================================
 @reportes_bp.route("/descargar/pdf")
 @login_required
 @roles_required("ADMIN")
 def descargar_general_pdf():
     
-    # Se consulta solo lo necesario — liviano y rápido
+    # ======== CONSULTAS BÁSICAS =========
     stats = {
         "total_clientes": Cliente.query.count(),
         "activos": Cliente.query.filter_by(estado_membresia=EstadoMembresia.ACTIVO).count(),
@@ -98,87 +124,127 @@ def descargar_general_pdf():
         "pagos_pendientes": Pago.query.filter_by(estado=EstadoPago.PENDIENTE).count(),
     }
 
+    # Fechas
     hoy = date.today()
-    asistencias_mes = Asistencia.query.filter(
-        extract("month", Asistencia.fecha) == hoy.month,
-        extract("year", Asistencia.fecha) == hoy.year
-    ).count()
 
-    # Agrupación por día de semana
-    dias_semana = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"]
-    asistencias_por_dia = Asistencia.query.with_entities(
-        extract("dow", Asistencia.fecha).label("dia"), func.count()
-    ).filter(
-        extract("month", Asistencia.fecha) == hoy.month,
-        extract("year", Asistencia.fecha) == hoy.year
-    ).group_by("dia").all()
+    # ======== PAGOS POR MES =========
+    meses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+             "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
-    asistencias_dict = {dias_semana[int(k)]: v for k,v in asistencias_por_dia}
-    pagos = Pago.query.order_by(Pago.fecha_pago.desc()).limit(20).all()
+    pagos_por_mes = {}
+    total_anual = 0
 
-    # ========= GENERACIÓN DEL PDF =========
+    for m in range(1, 12+1):
+        pagos_mes = Pago.query.filter(
+            Pago.estado == EstadoPago.VALIDADO,
+            extract("month", Pago.fecha_pago) == m,
+            extract("year", Pago.fecha_pago) == hoy.year
+        ).all()
+
+        total_mes = sum(p.monto for p in pagos_mes)
+        pagos_por_mes[m] = {"total": total_mes, "lista": pagos_mes}
+        total_anual += total_mes
+
+    # ======== ASISTENCIAS POR MES =========
+    asistencias_por_mes = {}
+
+    for m in range(1, 12+1):
+        asistencias = Asistencia.query.filter(
+            extract("month", Asistencia.fecha) == m,
+            extract("year", Asistencia.fecha) == hoy.year
+        ).all()
+
+        asistencias_por_mes[m] = len(asistencias)
+
+    # ======== GENERACIÓN DEL PDF =========
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=letter)
     pdf.setTitle("Reporte General HITO Sport")
 
-    pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(50, 760, "📄 Reporte General — HITO SPORT")
+    # Título principal
+    pdf.setFont("Helvetica-Bold", 20)
+    pdf.drawString(50, 760, "REPORTE GENERAL - HITO SPORT")
     pdf.setFont("Helvetica", 12)
     y = 730
 
-    # CLIENTES
+    # ======== RESUMEN GENERAL =========
     pdf.drawString(50, y, f"Total Clientes: {stats['total_clientes']}")
     pdf.drawString(250, y, f"Activos: {stats['activos']}")
     pdf.drawString(380, y, f"Vencidos: {stats['vencidos']}")
-    y -= 30
+    y -= 25
 
-    # PAGOS
     pdf.drawString(50, y, f"Total Pagos: {stats['total_pagos']}")
     pdf.drawString(250, y, f"Validados: {stats['pagos_validados']}")
     pdf.drawString(380, y, f"Pendientes: {stats['pagos_pendientes']}")
-    y -= 30
-
-    # ASISTENCIAS
-    pdf.drawString(50, y, f"Asistencias este mes: {asistencias_mes}")
     y -= 40
 
-    # 🔥 GRÁFICO DE ASISTENCIAS (barras)
-    drawing = Drawing(450, 150)
-    max_val = max(asistencias_dict.values() or [1])
-    pos_x = 20
-
-    for dia, total in asistencias_dict.items():
-        bar_height = (total / max_val) * 120
-        drawing.add(Rect(pos_x, 10, 40, bar_height, fillColor=colors.HexColor("#0077FF")))
-        drawing.add(String(pos_x, 0, dia[:3], fontSize=8))
-        drawing.add(String(pos_x, bar_height+15, str(total), fontSize=9))
-        pos_x += 55
-
-    renderPDF.draw(drawing, pdf, 50, y-140)
-    y -= 170
-
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, y, "Pagos Recientes (máx 20)")
+    # ======== PAGOS POR MES =========
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(50, y, "📌 PAGOS POR MES")
     y -= 20
-    pdf.setFont("Helvetica", 10)
+    pdf.setFont("Helvetica", 11)
 
-    for p in pagos:
+    for m in range(1, 13):
+
+        nombre_mes = meses[m-1]
+        total_mes = pagos_por_mes[m]["total"]
+        lista_pagos = pagos_por_mes[m]["lista"]
+
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(50, y, f"{nombre_mes} - Total: ${total_mes:.2f}")
+        y -= 18
+
+        pdf.setFont("Helvetica", 10)
+
+        if not lista_pagos:
+            pdf.drawString(60, y, "No hubo pagos este mes.")
+            y -= 18
+        else:
+            for p in lista_pagos:
+                linea = f"- {p.fecha_pago.strftime('%d/%m/%Y')} | {p.cliente.nombre} | ${p.monto:.2f}"
+                pdf.drawString(60, y, linea)
+                y -= 15
+
+                # Nueva página si se llena
+                if y < 60:
+                    pdf.showPage()
+                    y = 750
+
+        y -= 8
+
+        # Saltar de página entre meses largos
+        if y < 80:
+            pdf.showPage()
+            y = 750
+
+    # ======== TOTAL ANUAL =========
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(50, y, f"💰 TOTAL ANUAL DE INGRESOS: ${total_anual:.2f}")
+    y -= 40
+
+    # ======== ASISTENCIAS POR MES =========
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(50, y, "📌 ASISTENCIAS POR MES")
+    y -= 25
+    pdf.setFont("Helvetica", 11)
+
+    for m in range(1, 13):
+        pdf.drawString(
+            50, y,
+            f"{meses[m-1]}: {asistencias_por_mes[m]} asistencias"
+        )
+        y -= 18
+
         if y < 60:
             pdf.showPage()
             y = 750
-            pdf.setFont("Helvetica", 10)
-
-        color = {"PENDIENTE": colors.orange, "VALIDADO": colors.green, "RECHAZADO": colors.red}[p.estado.value]
-        pdf.setFillColor(color)
-        pdf.drawString(50, y, f"{p.cliente.nombre} — {p.tipo.value} — {p.monto} — {p.estado.value}")
-        pdf.setFillColor(colors.black)
-        y -= 15
 
     pdf.save()
     buffer.seek(0)
 
-    return send_file(buffer,
+    return send_file(
+        buffer,
         as_attachment=True,
-        download_name="reporte_general_HITO.pdf",
+        download_name="reporte_general_completo_HITO.pdf",
         mimetype="application/pdf"
     )

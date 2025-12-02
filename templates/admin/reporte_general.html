@@ -1,60 +1,102 @@
 {% extends "base/layout_admin.html" %}
-
 {% block title %}Reportes - Admin{% endblock %}
 
 {% block content %}
-<h2 class="fw-bold mb-4">📊 Reporte General del Sistema</h2>
 
-<div class="d-flex justify-content-end mb-3">
-    <a href="{{ url_for('reportes.descargar_general_pdf') }}" class="btn btn-success">
-        📄 Descargar PDF
+<h2 class="sect-title">Reporte General del Sistema</h2>
+
+<div class="text-end mb-4">
+    <a href="{{ url_for('reportes.descargar_general_pdf') }}" class="btn btn-success fw-bold px-4">
+        Descargar PDF
     </a>
 </div>
 
-<div class="row g-4">
+<div class="report-grid">
 
-    <!-- Clientes -->
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="fw-bold text-primary">👥 Clientes</h5>
-                <p><strong>Total:</strong> {{ total_clientes }}</p>
-                <p class="text-success"><strong>Activos:</strong> {{ activos }}</p>
-                <p class="text-danger"><strong>Vencidos:</strong> {{ vencidos }}</p>
-            </div>
-        </div>
+    <div class="report-card">
+        <h4 class="report-title c-blue">Clientes</h4>
+        <p><strong>Total:</strong> {{ total_clientes }}</p>
+        <p><strong class="c-green">Activos:</strong> {{ activos }}</p>
+        <p><strong class="c-red">Vencidos:</strong> {{ vencidos }}</p>
     </div>
 
-    <!-- Pagos -->
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="fw-bold text-warning">💵 Pagos</h5>
-                <p><strong>Total:</strong> {{ total_pagos }}</p>
-                <p class="text-success"><strong>Validados:</strong> {{ pagos_validados }}</p>
-                <p class="text-danger"><strong>Rechazados:</strong> {{ pagos_rechazados }}</p>
-                <p class="text-secondary"><strong>Pendientes:</strong> {{ pagos_pendientes }}</p>
-            </div>
-        </div>
+    <div class="report-card">
+        <h4 class="report-title c-yellow">Pagos</h4>
+        <p><strong>Total registros:</strong> {{ total_pagos }}</p>
+        <p><strong>Total Ganancia:</strong> ${{ total_ganancia }}</p>
+        <p><strong class="c-green">Validados:</strong> {{ pagos_validados }}</p>
+        <p><strong class="c-red">Rechazados:</strong> {{ pagos_rechazados }}</p>
+        <p><strong class="c-gray">Pendientes:</strong> {{ pagos_pendientes }}</p>
     </div>
 
-    <!-- Asistencias -->
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="fw-bold text-info">🟦 Asistencias</h5>
-                <p><strong>Este mes:</strong> {{ asistencias_mes }}</p>
-                
-                <h6 class="mt-3 text-secondary">Por día:</h6>
-                <ul class="ps-3">
-                    {% for dia, total in asistencias_por_dia.items() %}
-                        <li><strong>{{ dia }}:</strong> {{ total }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+    <div class="report-card">
+        <h4 class="report-title c-cyan">Asistencias</h4>
+        <p><strong>Este mes:</strong> {{ asistencias_mes }}</p>
+
+        <h6 class="report-subtitle">Por día:</h6>
+        <ul class="report-list">
+            {% for dia, total in asistencias_por_dia.items() %}
+                <li><strong>{{ dia }}:</strong> {{ total }}</li>
+            {% endfor %}
+        </ul>
     </div>
 
 </div>
+
+<!-- ========================== GRAFICO ========================== -->
+
+<div class="card shadow-sm mt-4" style="background:#111;border:1px solid #222;">
+    <div class="card-body">
+        <h4 class="report-title">Gráfico de Pagos Validados por Mes</h4>
+        <canvas id="graficoPagos" height="130"></canvas>
+    </div>
+</div>
+
+<!-- ========================== CHART TEMPLATE ========================== -->
+<script type="text/template" id="chart-template">
+{
+    "labels": {{ meses|tojson }},
+    "data": {{ montos_validados|tojson }}
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const raw = document.getElementById("chart-template").textContent;
+    const chartData = JSON.parse(raw);
+
+    const ctx = document.getElementById("graficoPagos");
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: "Pagos Validados ($)",
+                data: chartData.data,
+                borderWidth: 3,
+                borderColor: "#00c9ff",
+                backgroundColor: "rgba(0,201,255,0.25)",
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins:{
+                legend:{ labels:{ color:"#fff" } }
+            },
+            scales: {
+                x: { ticks:{ color:"#ccc" }, grid:{ color:"#333"} },
+                y: { ticks:{ color:"#ccc" }, grid:{ color:"#333"} }
+            }
+        }
+    });
+
+});
+</script>
 
 {% endblock %}

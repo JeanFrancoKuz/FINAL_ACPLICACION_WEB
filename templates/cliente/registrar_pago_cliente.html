@@ -3,43 +3,39 @@
 
 {% block content %}
 
-<h2 class="fw-bold mb-4 text-center">💳 Registrar Pago</h2>
+<h2 class="cliente-title text-center">💸 Registrar Pago</h2>
 
-<div class="card bg-dark text-light shadow-lg p-4 mx-auto" style="max-width: 600px;">
+<div class="page-center">
 
-    <form method="POST" enctype="multipart/form-data">
+    <div class="cliente-card max-600">
 
-        <!-- MONTO -->
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Monto a pagar</label>
-            <input type="number" step="0.01" min="1" name="monto" class="form-control" required placeholder="Ej: 15.00">
-        </div>
+        <form method="POST" enctype="multipart/form-data" class="cliente-form">
 
-        <!-- TIPO -->
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Método de pago</label>
-            <select name="tipo" class="form-select fw-semibold" required>
-                <option value="EFECTIVO">💵 Efectivo</option>
-                <option value="TRANSFERENCIA">🏦 Transferencia</option>
-                <option value="TARJETA">💳 Tarjeta</option>
+            <label class="cliente-label">Monto (Bolívares - Bs)</label>
+            <input type="number" step="0.01" name="monto"
+                class="cliente-input"
+                value="{{ monto_sugerido or '' }}" required>
+
+            <label class="cliente-label mt-3">Tipo de pago</label>
+            <select name="tipo" class="cliente-input" required>
+                <option value="">Seleccionar...</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="zelle">Zelle</option>
+                <option value="pago_movil">Pago móvil</option>
+                <option value="efectivo">Efectivo</option>
             </select>
-        </div>
 
-        <!-- COMPROBANTE -->
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Comprobante (Opcional)</label>
-            <input type="file" name="comprobante" class="form-control" accept="image/*,.pdf">
-            <small class="text-secondary">Aceptado: .jpg / .png / .pdf</small>
-        </div>
+            <label class="cliente-label mt-3">Subir comprobante</label>
+            <input type="file" name="comprobante" class="cliente-input">
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-success px-4 fw-bold">Enviar Pago</button>
+            <button class="cliente-btn btn-blue mt-4 w-100">
+                ✔ Enviar pago
+            </button>
 
-            {#  🔥 Se corrigió esta ruta (antes causaba error) #}
-            <a href="{{ url_for('cliente.dashboard_cliente') }}" class="btn btn-secondary px-4">Cancelar</a>
-        </div>
+        </form>
 
-    </form>
+    </div>
+
 </div>
 
 {% endblock %}

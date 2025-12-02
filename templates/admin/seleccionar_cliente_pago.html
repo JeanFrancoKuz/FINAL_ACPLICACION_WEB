@@ -1,56 +1,52 @@
 {% extends "base/layout_admin.html" %}
-
-{% block title %}Seleccionar Cliente - Admin{% endblock %}
+{% block title %}Seleccionar Cliente — Pago{% endblock %}
 
 {% block content %}
-<h2 class="fw-bold mb-4">Seleccionar Cliente para Registrar Pago</h2>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
+<h2 class="sect-title">Seleccionar Cliente para Registrar Pago</h2>
+<a href="{{ url_for('pago.lista_pagos') }}" class="btn-back">◀ Volver</a>
 
-        <!-- Formulario búsqueda -->
-        <form method="GET" class="mb-4 d-flex gap-2">
-            <input type="text" name="q" class="form-control" style="max-width:350px"
-                placeholder="Buscar por nombre o cédula..."
+<div class="card-pago-select">
+
+    <!-- 🔍 Buscador -->
+    <form method="GET" class="select-search">
+        <input type="text" name="q" placeholder="Buscar por nombre o cédula..."
                 value="{{ search | default('') }}">
-            <button type="submit" class="btn btn-outline-dark">Buscar</button>
-        </form>
+        <button type="submit">Buscar</button>
+    </form>
 
-        <!-- Tabla clientes -->
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Cédula</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cliente in clientes %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ cliente.nombre }}</td>
-                        <td>{{ cliente.cedula }}</td>
-                        <td>
-                            <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=cliente.id) }}" 
-                                class="btn btn-sm btn-primary">
-                                Registrar Pago
-                            </a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center py-3 text-muted">
-                            No se encontraron clientes
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
+    <!-- 📋 Tabla -->
+    <div class="table-box">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre Completo</th>
+                    <th>Cédula</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.cedula }}</td>
+                    <td>
+                        <a href="{{ url_for('pago.registrar_pago_admin', cliente_id=cliente.id) }}" 
+                            class="btn-a info">Registrar</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="no-data">No se encontraron clientes para registrar pago</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
+
 </div>
+
 {% endblock %}

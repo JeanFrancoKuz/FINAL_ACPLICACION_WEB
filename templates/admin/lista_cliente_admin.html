@@ -3,130 +3,81 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Gestión de Clientes</h2>
-    <a href="{{ url_for('admin.crear_cliente') }}" class="btn btn-primary">
-        <i class="bi bi-person-plus"></i> Nuevo Cliente
-    </a>
-</div>
+<h2 class="sect-title">Gestión de Clientes</h2>
 
-<div class="card shadow-sm">
-    <div class="card-body">
+<a href="{{ url_for('admin.crear_cliente') }}" class="btn-new">
+    ➕ Nuevo Cliente
+</a>
 
-        <!-- 🔍 Filtro y Búsqueda -->
-        <form class="row g-2 mb-3" method="GET" action="{{ url_for('admin.lista_clientes') }}">
+<div class="card-admin">
 
-            <div class="col-md-4">
-                <input type="text" 
-                        name="q" 
-                        value="{{ request.args.get('q','') }}"
-                        placeholder="Buscar por nombre, cédula o correo..."
-                        class="form-control">
-            </div>
+    <!-- 🔍 Buscador -->
+    <form class="filter-row" method="GET" action="{{ url_for('admin.lista_clientes') }}">
 
-            <div class="col-md-3">
-                <select name="estado" class="form-select">
-                    <option value="">Todos los estados</option>
-                    {% for e in ['ACTIVO','INACTIVO','PENDIENTE','SUSPENDIDO','VENCIDO'] %}
-                        <option value="{{ e }}" 
-                                {% if request.args.get('estado') == e %} selected {% endif %}>
-                            {{ e }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+        <input type="text" name="q" value="{{ request.args.get('q','') }}"
+            placeholder="Buscar nombre, cédula o correo...">
 
-            <div class="col-md-2 d-grid">
-                <button class="btn btn-outline-dark">
-                    <i class="bi bi-funnel"></i> Filtrar
-                </button>
-            </div>
+        <select name="estado">
+            <option value="">Estado...</option>
+            {% for e in ['ACTIVO','INACTIVO','PENDIENTE','SUSPENDIDO','VENCIDO'] %}
+                <option value="{{ e }}" {% if request.args.get('estado') == e %} selected {% endif %}>
+                    {{ e }}
+                </option>
+            {% endfor %}
+        </select>
 
-        </form>
-
-        <!-- 📄 Tabla -->
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Cédula</th>
-                        <th>Estado</th>
-                        <th>Ingreso</th>
-                        <th>Vencimiento</th>
-                        <th class="text-center" width="270">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                {% for cliente in clientes %}
+        <button class="btn-filter">Filtrar</button>
+    </form>
+    <!-- 📄 Tabla -->
+    <div class="table-box">
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <td class="text-muted">{{ loop.index }}</td>
-                    <td>{{ cliente.nombre }}</td>
-                    <td>{{ cliente.correo or "-" }}</td>
-                    <td>{{ cliente.cedula }}</td>
-
-                    <!-- Badge Estado -->
-                    <td>
-                        <span class="badge 
-                            {% if cliente.estado_membresia.value == 'ACTIVO' %}bg-success
-                            {% elif cliente.estado_membresia.value == 'INACTIVO' %}bg-secondary
-                            {% elif cliente.estado_membresia.value == 'PENDIENTE' %}bg-warning
-                            {% elif cliente.estado_membresia.value == 'SUSPENDIDO' %}bg-danger
-                            {% elif cliente.estado_membresia.value == 'VENCIDO' %}bg-dark
-                            {% endif %}
-                            ">
-                            {{ cliente.estado_membresia.value }}
-                        </span>
-                    </td>
-
-                    <td>{{ cliente.fecha_ingreso.strftime('%d-%m-%Y') }}</td>
-                    <td>{{ cliente.membresia_vencimiento.strftime('%d-%m-%Y') if cliente.membresia_vencimiento else '-' }}</td>
-
-                    <td class="text-center">
-
-                        <a href="{{ url_for('admin.cliente_detalle_admin', id=cliente.id) }}" class="btn btn-info btn-sm">
-                            Detalle
-                        </a>
-
-                        <a href="{{ url_for('admin.editar_cliente', id=cliente.id) }}" class="btn btn-warning btn-sm">
-                            Editar
-                        </a>
-
-                        <form action="{{ url_for('admin.eliminar_cliente', id=cliente.id) }}"
-                                method="POST" class="d-inline">
-                            <button class="btn btn-danger btn-sm"
-                                    onclick="return confirm('¿Eliminar cliente definitivamente?');">
-                                Eliminar
-                            </button>
-                        </form>
-
-                        {% if cliente.estado_membresia.value == 'VENCIDO' and cliente.telefono %}
-                            {% set mensaje = (
-                                'Hola ' ~ cliente.nombre ~ ', tu membresía expiró el ' ~
-                                cliente.membresia_vencimiento.strftime('%d-%m-%Y') ~
-                                '. Te invitamos a renovarla para volver a entrenar en HITO ALL SPORT 💪🔥'
-                            ) %}
-                            <a href="https://wa.me/{{ cliente.telefono|replace('+','') }}?text={{ mensaje|urlencode }}"
-                                target="_blank"
-                                class="btn btn-success btn-sm mt-1">
-                                WhatsApp
-                            </a>
-                        {% endif %}
-
-                    </td>
+                    <th>#</th><th>Nombre</th><th>Correo</th><th>Cédula</th>
+                    <th>Estado</th><th>Ingreso</th><th>Vence</th>
+                    <th width="260" class="text-center">Acciones</th>
                 </tr>
-
-                {% else %}
-                <tr><td colspan="8" class="text-center py-4 text-muted">No hay resultados.</td></tr>
-                {% endfor %}
-
-                </tbody>
-            </table>
-        </div>
-
+            </thead>
+            <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ c.nombre }}</td>
+                <td>{{ c.correo or "-" }}</td>
+                <td>{{ c.cedula }}</td>
+                <td>
+                    <span class="estado {{ c.estado_membresia.value|lower }}">
+                        {{ c.estado_membresia.value }}
+                    </span>
+                </td>
+                <td>{{ c.fecha_ingreso.strftime('%d-%m-%Y') }}</td>
+                <td>{{ c.membresia_vencimiento.strftime('%d-%m-%Y') if c.membresia_vencimiento else "-" }}</td>
+                <td class="action-td">
+                    <a class="btn-a info"
+                        href="{{ url_for('admin.cliente_detalle_admin', id=c.id) }}">Detalle</a>
+                    <a class="btn-a warn"
+                        href="{{ url_for('admin.editar_cliente', id=c.id) }}">Editar</a>
+                    <form method="POST"
+                            action="{{ url_for('admin.eliminar_cliente', id=c.id) }}"
+                            onsubmit="return confirm('Eliminar cliente definitivamente?')" class="d-inline">
+                        <button class="btn-a danger">Eliminar</button>
+                    </form>
+                    {% if c.estado_membresia.value == 'VENCIDO' and c.telefono %}
+                        {% set msg = 'Hola ' ~ c.nombre ~ ', tu membresía expiró el ' ~
+                            c.membresia_vencimiento.strftime('%d-%m-%Y') ~
+                            '. Renueva y vuelve a entrenar con fuerza 💪🔥' %}
+                        <a class="btn-a whatsapp" target="_blank"
+                            href="https://wa.me/{{ c.telefono|replace('+','') }}?text={{ msg|urlencode }}">
+                            WhatsApp
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="no-data">No hay resultados...</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 

@@ -1,0 +1,66 @@
+{% extends "base/layout_cliente.html" %}
+{% block title %}Historial de Pagos{% endblock %}
+
+{% block content %}
+
+<h2 class="cliente-title text-center">📑 Historial de pagos</h2>
+
+<div class="cliente-card mt-4">
+
+{% if pagos %}
+
+<table class="cliente-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Monto (Bs)</th>
+            <th>Tipo</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Comprobante</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pago in pagos %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td class="c-green fw-bold">{{ pago.monto }}Bs.</td>
+            <td>{{ pago.tipo.value }}</td>
+            <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
+
+            <td>
+                <span class="cliente-badge
+                    {% if pago.estado.name == 'PENDIENTE' %} warning
+                    {% elif pago.estado.name == 'VALIDADO' %} success
+                    {% elif pago.estado.name == 'RECHAZADO' %} danger
+                    {% endif %}">
+                    {{ pago.estado.value }}
+                </span>
+            </td>
+
+            <td class="text-center">
+                {% if pago.fotos %}
+                    {% for foto in pago.fotos %}
+                        <a href="{{ url_for('static', filename=foto.ruta) }}"
+                            target="_blank"
+                            class="cliente-btn btn-sm btn-blue">
+                            Ver
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <span class="cliente-text">Sin archivo</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<p class="cliente-text text-center m-4">No hay pagos registrados.</p>
+{% endif %}
+
+</div>
+
+{% endblock %}

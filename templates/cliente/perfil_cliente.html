@@ -3,100 +3,93 @@
 
 {% block content %}
 
-{# ======================  STATUS DE MEMBRESÍA ====================== #}
-{# hoy = 'today' viene desde la ruta - garantizado como datetime.date #}
+<h2 class="cliente-title">Mi Perfil</h2>
 
-{% set vencida = cliente.membresia_vencimiento 
-                    and cliente.membresia_vencimiento.date() < today %}
+<div class="cliente-profile-card">
 
-{% set dias_restantes = (cliente.membresia_vencimiento.date() - today).days
-                        if cliente.membresia_vencimiento else None %}
+    <!-- FOTO PERFIL -->
+    <div class="cliente-profile-photo-wrapper">
 
+        {% if cliente.foto_perfil %}
+            <img src="{{ url_for('static', filename=cliente.foto_perfil) }}"
+                 class="cliente-profile-photo">
+        {% else %}
+            <img src="{{ url_for('static', filename='img/placeholder_profile.png') }}"
+                 class="cliente-profile-photo">
+        {% endif %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Mi Perfil</h2>
-    <a href="{{ url_for('cliente.dashboard_cliente') }}" class="btn btn-outline-dark btn-sm">
-        ⬅ Volver al Panel
-    </a>
-</div>
-
-
-<div class="row g-4 align-items-start">
-
-    <!-- =================  FOTO PERFIL ================= -->
-    <div class="col-md-4 text-center">
-        <div class="p-3 rounded shadow-sm border">
-
-            {% if cliente.foto_perfil %}
-                <img src="{{ url_for('static', filename=cliente.foto_perfil) }}"
-                        class="rounded-circle shadow border"
-                        width="170" height="170" style="object-fit:cover;">
-            {% else %}
-                <img src="{{ url_for('static', filename='img/placeholder_profile.png') }}"
-                        class="rounded-circle shadow border"
-                        width="170" height="170">
-            {% endif %}
-
-            <hr>
-            <a class="btn btn-warning btn-sm fw-bold"
-                href="{{ url_for('cliente.subir_foto_perfil', id=cliente.id) }}">Cambiar foto</a>
-        </div>
     </div>
 
 
+    <!-- DATOS PERSONALES + MEMBRESÍA -->
+    <div class="cliente-profile-info">
 
-    <!-- ================= INFO PERSONAL + MEMBRESÍA ================= -->
-    <div class="col-md-8">
-        <div class="p-4 rounded shadow-sm border bg-white">
+        <!-- ======= Datos ======= -->
+        <h3 class="cliente-card-title c-blue">Datos personales</h3>
 
-            <h4 class="text-primary fw-bold mb-3">Datos Personales</h4>
-            <p><b>Nombre:</b>   {{ cliente.nombre }}</p>
-            <p><b>Cédula:</b>   {{ cliente.cedula }}</p>
-            <p><b>Correo:</b>   {{ cliente.correo or "No registrado" }}</p>
-            <p><b>Teléfono:</b> {{ cliente.telefono or "Sin cargar" }}</p>
+        <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
+        <p><strong>Cédula:</strong> {{ cliente.cedula }}</p>
+        <p><strong>Correo:</strong> {{ cliente.correo or "No registrado" }}</p>
+        <p><strong>Teléfono:</strong> {{ cliente.telefono or "Sin cargar" }}</p>
 
-            <hr>
+        <hr class="cliente-divider">
 
-            <h4 class="fw-bold text-success">Estado de Membresía</h4>
+        <!-- ======= Membresía ======= -->
+        <h3 class="cliente-card-title c-green">Membresía</h3>
 
-            <p><b>Estado:</b>
-                <span class="badge
-                    {% if vencida %} bg-danger
-                    {% elif dias_restantes and dias_restantes < 5 %} bg-warning text-dark
-                    {% else %} bg-success {% endif %}">
-                    {{ "VENCIDA" if vencida else cliente.estado_membresia.value }}
-                </span>
-            </p>
+        {% set vencida = cliente.membresia_vencimiento and cliente.membresia_vencimiento.date() < today %}
+        {% set dias_restantes = (cliente.membresia_vencimiento.date() - today).days if cliente.membresia_vencimiento else None %}
 
-            <p><b>Fecha de ingreso:</b>
-                {{ cliente.fecha_ingreso.strftime('%d/%m/%Y') if cliente.fecha_ingreso else '---' }}
-            </p>
+        <p>
+            <strong>Estado:</strong>
+            <span class="cliente-badge 
+                {% if vencida %} danger
+                {% elif dias_restantes and dias_restantes < 5 %} warning
+                {% else %} success
+                {% endif %}">
+                {{ "VENCIDA" if vencida else cliente.estado_membresia.value }}
+            </span>
+        </p>
 
-            <p><b>Vence el:</b>
-                {% if cliente.membresia_vencimiento %}
-                    {{ cliente.membresia_vencimiento.strftime('%d/%m/%Y') }}
+        <p><strong>Fecha ingreso:</strong>
+            {{ cliente.fecha_ingreso.strftime('%d/%m/%Y') if cliente.fecha_ingreso else '---' }}
+        </p>
 
-                    {% if vencida %}
-                        <span class="text-danger fw-bold ms-2">⚠ Vencida</span>
-
-                    {% elif dias_restantes < 5 %}
-                        <span class="text-warning fw-bold ms-2">
-                            ⏳ Quedan {{ dias_restantes }} días
-                        </span>
-
-                    {% endif %}
-
-                {% else %}
-                    <span class="text-warning">Sin registro</span>
+        <p><strong>Vence:</strong>
+            {% if cliente.membresia_vencimiento %}
+                {{ cliente.membresia_vencimiento.strftime('%d/%m/%Y') }}
+                {% if vencida %}
+                    <span class="cliente-text danger">⚠ Vencida</span>
+                {% elif dias_restantes < 5 %}
+                    <span class="cliente-text warning">⏳ {{ dias_restantes }} días</span>
                 {% endif %}
-            </p>
+            {% else %}
+                <span class="cliente-text warning">Sin registro</span>
+            {% endif %}
+        </p>
 
-            <div class="d-flex flex-wrap gap-3 mt-4">
-                <a class="btn btn-primary" href="{{ url_for('progreso.historial_progreso') }}">📈 Ver Progreso</a>
-                <a class="btn btn-success" href="{{ url_for('cliente.registrar_pago_cliente') }}">💳 Renovar Membresía</a>
-            </div>
+
+        <!-- ======= BOTONES ======= -->
+        <div class="cliente-actions mt-3">
+
+            <!-- Botón editar todo el perfil, incluida foto -->
+            <a href="{{ url_for('cliente.editar_perfil_cliente', id=cliente.id) }}"
+                class="cliente-btn btn-yellow">
+                ✏️ Editar perfil
+            </a>
+
+            <a href="{{ url_for('progreso.historial_progreso') }}"
+                class="cliente-btn btn-green">
+                📈 Ver progreso
+            </a>
+
+            <a href="{{ url_for('cliente.registrar_pago_cliente') }}"
+                class="cliente-btn btn-blue">
+                💳 Renovar membresía
+            </a>
 
         </div>
+
     </div>
 
 </div>

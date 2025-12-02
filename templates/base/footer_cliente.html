@@ -1,17 +1,30 @@
-<footer class="footer-cliente text-center py-3 mt-5 fadeIn">
+<footer class="footer-cliente">
 
-    <p class="m-0 small">
-        © {{ current_year if current_year else "" }} HITO ALL SPORT
-    </p>
+    <div class="footer-cliente-grid">
+        <div>
+            <h4 class="footer-cliente-title">Síguenos</h4>
+            <a href="https://www.instagram.com/hitoallsports" target="_blank" class="footer-cliente-link">
+                @hitoallsports
+            </a>
+        </div>
 
-    <p class="m-0 small text-red fw-bold">
-        Panel exclusivo para clientes registrados
-    </p>
+        <div>
+            <h4 class="footer-cliente-title">Contacto</h4>
+            <p class="footer-cliente-text">📞 +58 422-3232212</p>
+            <p class="footer-cliente-text">📧 hitoallsport@gmail.com</p>
+        </div>
+
+        <div>
+            <h4 class="footer-cliente-title">Ubicación</h4>
+            <p class="footer-cliente-text">Av. Bermúdez, CC Hito, Piso 7, Local 1</p>
+            <p class="footer-cliente-text">Los Teques 1201</p>
+        </div>
+    </div>
+
+    <p class="footer-cliente-copy">© <span id="year"></span> HITO ALL SPORT — Panel Cliente</p>
 
 </footer>
 
-<!-- Si current_year no se está enviando desde Flask -->
 <script>
-    document.currentScript.previousElementSibling.querySelector("p").innerHTML =
-        `© ${new Date().getFullYear()} HITO ALL SPORT`;
+document.getElementById("year").textContent = new Date().getFullYear()
 </script>

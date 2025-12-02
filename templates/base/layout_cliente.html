@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{% block title %}Panel del Cliente{% endblock %}</title>
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
-    <!-- Estilos Globales -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Panel Cliente{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cliente.css') }}">
 </head>
-<body class="app-dark fadeIn"><!-- ⛔ antes faltaba animación + fondo -->
-    {% include 'base/navbar_cliente.html' %}
-    <!-- Main con espacio para navbar fijo -->
-    <main class="container cliente-main pt-5 mt-4 pb-5"><!-- 👈 margen visual agregado -->
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show glow-alert" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
-        {% block content %}{% endblock %}
-    </main>
+    <body class="cliente-body">
 
-    {% include 'base/footer_cliente.html' %}
+        {% include "base/navbar_cliente.html" %}
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-</body>
+        <main class="cliente-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        {% include "base/footer_cliente.html" %}
+        <script>
+            const toggleC = document.getElementById("nav-toggle-cliente");
+            const menuC   = document.getElementById("nav-links-cliente");
+            toggleC?.addEventListener("click",()=>menuC.classList.toggle("open"));
+            document.querySelectorAll("#nav-links-cliente a")
+                .forEach(a=>a.addEventListener("click",()=>menuC.classList.remove("open")));
+        </script>
+    </body>
 </html>

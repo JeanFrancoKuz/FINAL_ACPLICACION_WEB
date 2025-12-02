@@ -1,74 +1,167 @@
 {% extends "base/layout_cliente.html" %}
-{% block title %}Mis Pagos{% endblock %}
+{% block title %}Pagos{% endblock %}
 
 {% block content %}
 
-<h2 class="fw-bold mb-4 text-center">💰 Historial de Pagos</h2>
+<h2 class="cliente-title text-center">Pagos y Membresías</h2>
+
+
+<!-- =====================
+TASA DEL DÓLAR BCV
+===================== -->
+<div class="plan-dolar-card">
+    <h3>Tasa del dólar (BCV)</h3>
+    <span id="precio-dolar" class="dolar-precio">Cargando...</span>
+    <small>Actualización automática</small>
+</div>
+
+
+<!-- =====================
+PLANES
+===================== -->
+<div class="planes-container">
+
+    <!-- PLAN PESAS -->
+    <div class="plan-card">
+        <h3 class="plan-title">Plan Pesas — $30</h3>
+
+        <ul class="plan-list">
+            <li>✔ Acceso ilimitado a zona de pesas</li>
+            <li>✔ Sauna y vapor incluidos</li>
+            <li>✔ Áreas especiales</li>
+        </ul>
+
+        <div class="plan-precio">
+            <strong>$30</strong>
+            <span id="plan30Bs">Cargando...</span>
+        </div>
+
+        <button class="plan-btn" onclick="irAPago(30)">
+            Elegir plan
+        </button>
+    </div>
+
+
+    <!-- PLAN FULL -->
+    <div class="plan-card">
+        <h3 class="plan-title">Plan Full — $35</h3>
+
+        <ul class="plan-list">
+            <li>✔ Todo del plan pesas</li>
+            <li>✔ Sauna + vapor</li>
+            <li>✔ Áreas especiales + clases fitness</li>
+        </ul>
+
+        <div class="plan-precio">
+            <strong>$35</strong>
+            <span id="plan35Bs">Cargando...</span>
+        </div>
+
+        <button class="plan-btn" onclick="irAPago(35)">
+            Elegir plan
+        </button>
+    </div>
+
+</div>
+
+
+<!-- =====================
+  BOTÓN MANUAL
+===================== -->
+<div class="manual-pay">
+    <a href="{{ url_for('pago.registrar_pago_cliente_auto') }}" class="manual-btn">
+        Registrar pago manualmente
+    </a>
+</div>
+
+
+<hr class="cliente-divider my-5">
+
+
+<!-- =====================
+  HISTORIAL RECIENTE
+===================== -->
+
+<h3 class="cliente-card-title c-blue mt-4">Historial reciente</h3>
 
 {% if pagos %}
-
-<div class="table-responsive">
-<table class="table table-dark table-hover text-center align-middle shadow-sm">
-
-    <thead class="table-light text-dark">
+<table class="cliente-table mt-3">
+    <thead>
         <tr>
-            <th>#</th>
             <th>Monto</th>
-            <th>Tipo</th>
             <th>Fecha</th>
             <th>Estado</th>
-            <th>Comprobante</th>
         </tr>
     </thead>
-
     <tbody>
-        {% for pago in pagos %}
+        {% for pago in pagos[:3] %}
         <tr>
-            <td>{{ loop.index }}</td>
-
-            <td><strong>${{ pago.monto }}</strong></td>
-
-            <td>{{ pago.tipo.value }}</td>
-
-            <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
-
+            <td>{{ pago.monto }}Bs</td>
+            <td>{{ pago.fecha_pago.strftime('%d-%m-%Y') }}</td>
             <td>
-                <span class="badge 
-                    {% if pago.estado.value == 'PENDIENTE' %}bg-warning
-                    {% elif pago.estado.value == 'VALIDADO' %}bg-success
-                    {% elif pago.estado.value == 'RECHAZADO' %}bg-danger
-                    {% endif %}
-                ">{{ pago.estado.value }}</span>
-            </td>
-
-            <td>
-                {% if pago.fotos %}
-                    {% for foto in pago.fotos %}
-                        <a href="{{ url_for('static', filename=foto.ruta) }}" 
-                            target="_blank" class="text-info d-block fst-italic">📄 Ver Archivo</a>
-                    {% endfor %}
-                {% else %}
-                    <span class="text-muted">Sin comprobante</span>
-                {% endif %}
+                <span class="cliente-badge
+                    {% if pago.estado.name == 'PENDIENTE' %} warning
+                    {% elif pago.estado.name == 'VALIDADO' %} success
+                    {% elif pago.estado.name == 'RECHAZADO' %} danger
+                    {% endif %}">
+                    {{ pago.estado.value }}
+                </span>
             </td>
         </tr>
         {% endfor %}
     </tbody>
-
 </table>
-</div>
+
+<a href="{{ url_for('pago.historial_pagos_cliente') }}" class="historial-btn">
+    Ver historial completo
+</a>
 
 {% else %}
-<div class="alert alert-info text-center">
-    Aún no tienes pagos registrados.
-</div>
+<p class="cliente-text mt-3">No hay pagos registrados.</p>
 {% endif %}
 
-<div class="text-center mt-4">
-    <a href="{{ url_for('pago.registrar_pago', cliente_id=current_user.cliente.id) }}"
-        class="btn btn-primary px-4 fw-bold">
-        Registrar nuevo pago
-    </a>
-</div>
+
+
+<!-- =====================
+SCRIPT — CONVERSIÓN
+===================== -->
+<script>
+let tasaGlobal = 0;
+
+async function obtenerDolar() {
+    const precio = document.getElementById("precio-dolar");
+
+    try {
+        const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+        const data = await res.json();
+
+        tasaGlobal = data.rates["VES"];
+        precio.textContent = tasaGlobal.toFixed(2) + " Bs";
+
+        document.getElementById("plan30Bs").textContent =
+            (30 * tasaGlobal).toFixed(2) + " Bs";
+
+        document.getElementById("plan35Bs").textContent =
+            (35 * tasaGlobal).toFixed(2) + " Bs";
+
+    } catch {
+        precio.textContent = "Error ❌";
+        document.getElementById("plan30Bs").textContent = "--";
+        document.getElementById("plan35Bs").textContent = "--";
+    }
+}
+
+obtenerDolar();
+
+function irAPago(montoUSD) {
+    if (!tasaGlobal) {
+        // si no hay conversión → enviamos solo USD
+        window.location.href = `/pagos/registrar?usd=${montoUSD}`;
+        return;
+    }
+    const montoBs = (montoUSD * tasaGlobal).toFixed(2);
+    window.location.href = `/pagos/registrar?usd=${montoUSD}&bs=${montoBs}`;
+}
+</script>
 
 {% endblock %}

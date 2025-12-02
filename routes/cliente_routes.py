@@ -83,26 +83,79 @@ def detalles_cliente(id):
 def editar_perfil_cliente(id):
     cliente = Cliente.query.get_or_404(id)
 
+    # 🔐 Seguridad — usuario cliente NO puede editar a otro
     if current_user.cliente.id != id:
         flash("No puedes modificar otro perfil ❌", "danger")
         return redirect(url_for("cliente.dashboard_cliente"))
 
     if request.method == "POST":
+
+        # -------------------------------------
+        # 📌 DATOS PERSONALES
+        # -------------------------------------
         cliente.nombre   = request.form.get("nombre")
         cliente.correo   = request.form.get("correo") or None
         cliente.telefono = request.form.get("telefono") or None
 
-        # Cambiar contraseña opcionalmente
+        # -------------------------------------
+        # 🧿 CONTRASEÑA (opcional)
+        # -------------------------------------
         nueva_clave = request.form.get("password")
         if nueva_clave:
             cliente.usuario.set_password(nueva_clave)
 
+        # -------------------------------------
+        # 🖼 FOTO DE PERFIL
+        # -------------------------------------
+        archivo = request.files.get("foto")
+
+        if archivo and archivo.filename != "":
+            ext = os.path.splitext(archivo.filename)[1].lower()
+
+            if ext not in [".jpg",".jpeg",".png"]:
+                flash("Formato inválido (solo JPG/PNG) ❗", "danger")
+                return redirect(request.url)
+
+            # 📁 Carpeta destino
+            perfil_dir = os.path.join(
+                current_app.root_path,
+                "static","uploads","perfil"
+            )
+            os.makedirs(perfil_dir, exist_ok=True)
+
+            # 📄 Nombre seguro
+            filename = secure_filename(
+                f"profile_{id}_{datetime.utcnow():%Y%m%d%H%M%S}{ext}"
+            )
+
+            ruta_guardado = os.path.join(perfil_dir, filename)
+            archivo.save(ruta_guardado)
+
+            # 🧹 Borrar foto vieja si existe
+            if cliente.foto_perfil:
+                old_path = os.path.join(
+                    current_app.root_path,
+                    "static",
+                    cliente.foto_perfil.replace("uploads/","")
+                )
+                try:
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                except Exception:
+                    pass
+
+            # 🆕 Guardar nueva ruta en DB
+            cliente.foto_perfil = f"uploads/perfil/{filename}"
+
+        # -------------------------------------
+        # 💾 GUARDAR EN BD
+        # -------------------------------------
         db.session.commit()
-        flash("Perfil actualizado con éxito ✔", "success")
+        flash("Perfil actualizado correctamente ✔", "success")
+
         return redirect(url_for("cliente.detalles_cliente", id=id))
 
     return render_template("cliente/editar_perfil_cliente.html", cliente=cliente)
-
 
 
 # ===============================================================

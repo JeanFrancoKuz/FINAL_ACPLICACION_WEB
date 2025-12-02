@@ -172,12 +172,11 @@ a{text-decoration:none;color:inherit;}
         linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.35)),
         url("../img/fondo_auth.jpg") center/cover fixed;
 }
-
 /* ============================================================
-    🔥 AUTH FULL UI REFACTORED — FINAL BUILD
-   ------------------------------------------------------------
-   Cards más arriba, efecto cristal real, campos más claros,
-   flash-box corporativo optimizado y copy-link integrado.
+    AUTH FULL UI REFACTORED — FINAL BUILD
+------------------------------------------------------------
+Cards más arriba, efecto cristal real, campos más claros,
+flash-box corporativo optimizado y copy-link integrado.
 ============================================================ */
 
 /* FONDO GLOBAL */
@@ -294,7 +293,7 @@ a{text-decoration:none;color:inherit;}
 }
 
 /* ============================================================
-    FLASH REFACTORED + COPY (Final)
+    FLASH REFACTORED 
 ============================================================ */
 .flash-container{
     display:flex;
@@ -342,11 +341,12 @@ a{text-decoration:none;color:inherit;}
     transform:scale(1.07);
 }
 
-/* Ocultar si no hay link */
 .flash-copy-btn.hidden{display:none;}
 
-/* MOBILE RESPONSIVE */
 @media(max-width:480px){
     .login-card,.recover-card,.reset-card{padding:28px 22px;}
     .login-title,.recover-title,.reset-title{font-size:1.6rem;}
 }
+
+
+
