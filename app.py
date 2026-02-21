@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 from extensions import db, login_manager
 from models.usuarios import Usuario
@@ -31,13 +31,18 @@ def create_app():
         return Usuario.query.get(int(user_id))
 
     # Registra blueprints
-    for bp in (admin_bp, auth_bp, cliente_bp, pago_bp,
-            asistencia_bp, foto_bp, progreso_bp, reportes_bp):
-        app.register_blueprint(bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(cliente_bp)
+    app.register_blueprint(pago_bp)
+    app.register_blueprint(asistencia_bp)
+    app.register_blueprint(foto_bp)
+    app.register_blueprint(progreso_bp)
+    app.register_blueprint(reportes_bp)
 
     @app.route("/")
     def index():
-        return "Aplicación Web Universidad - Proyecto Local"
+        return render_template('public/landing.html')
 
     # --- Inicialización de BD y roles ---
     with app.app_context():

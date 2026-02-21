@@ -1,0 +1,102 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Detalle Cliente - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Encabezado cliente -->
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-3">
+            {% if foto_perfil %}
+                <img src="{{ url_for('static', filename=foto_perfil.ruta) }}" alt="Foto de perfil" class="rounded-circle" width="100" height="100">
+            {% else %}
+                <img src="{{ url_for('static', filename='img/placeholder_profile.png') }}" alt="Foto de perfil" class="rounded-circle" width="100" height="100">
+            {% endif %}
+        </div>
+        <div>
+            <h3>{{ cliente.nombre }}</h3>
+            <p class="mb-1"><strong>Cédula:</strong> {{ cliente.cedula }}</p>
+            <p class="mb-1"><strong>Correo:</strong> {{ cliente.correo }}</p>
+            <p class="mb-1"><strong>Teléfono:</strong> {{ cliente.numero }}</p>
+        </div>
+    </div>
+
+    <!-- Últimos pagos -->
+    <div class="mb-5">
+        <h4>Últimos Pagos</h4>
+        {% if pagos %}
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Monto</th>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Comprobante</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in pagos %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>${{ pago.monto }}</td>
+                    <td>{{ pago.tipo.value }}</td>
+                    <td>{{ pago.fecha_pago.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if pago.estado.value == 'PENDIENTE' %}bg-warning
+                            {% elif pago.estado.value == 'VALIDADO' %}bg-success
+                            {% elif pago.estado.value == 'RECHAZADO' %}bg-danger
+                            {% endif %}">
+                            {{ pago.estado.value }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if pago.fotos %}
+                            {% for foto in pago.fotos %}
+                                <a href="{{ url_for('static', filename=foto.ruta) }}" target="_blank">Ver</a><br>
+                            {% endfor %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No hay pagos registrados.</p>
+        {% endif %}
+    </div>
+
+    <!-- Últimas asistencias -->
+    <div>
+        <h4>Últimas Asistencias</h4>
+        {% if asistencias %}
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Tipo de asistencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asistencia in asistencias %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ asistencia.fecha.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td>{{ asistencia.tipo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No hay asistencias registradas.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

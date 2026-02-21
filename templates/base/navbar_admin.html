@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+    <a class="navbar-brand fw-bold text-uppercase" href="{{ url_for('admin.dashboard') }}">HITO Admin</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarAdmin">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.lista_clientes') }}">Clientes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('pago.lista_pagos') }}">Pagos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('asistencia.lista_asistencias') }}">Asistencias</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('reportes.reporte_general') }}">Reportes</a></li>
+        </ul>
+        <form action="{{ url_for('auth.logout') }}" method="POST">
+            <button class="btn btn-danger btn-sm">Cerrar sesión</button>
+        </form>
+    </div>
+</nav>

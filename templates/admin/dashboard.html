@@ -1,0 +1,51 @@
+{% extends "base/layout_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4">Dashboard Administrativo</h2>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Clientes Activos</h5>
+                <h2>{{ clientes_activos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-white bg-secondary">
+            <div class="card-body">
+                <h5 class="card-title">Clientes Vencidos</h5>
+                <h2>{{ clientes_vencidos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Pagos Registrados</h5>
+                <h2>{{ pagos_registrados }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Pagos Pendientes</h5>
+                <h2>{{ pagos_pendientes }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-4">
+        <div class="card shadow-sm border-0 text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Asistencias Hoy</h5>
+                <h2>{{ asistencias_hoy }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

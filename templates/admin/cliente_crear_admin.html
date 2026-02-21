@@ -1,0 +1,69 @@
+{% extends "base/layout_admin.html" %}
+
+{% block title %}Registrar Cliente{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Registrar Nuevo Cliente</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <form action="{{ url_for('admin.crear_cliente') }}" method="POST" enctype="multipart/form-data">
+            <!-- Nombre -->
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+            <!-- Correo -->
+            <div class="mb-3">
+                <label class="form-label">Correo Electrónico</label>
+                <input type="email" name="correo" class="form-control" required>
+            </div>
+            <!-- Cédula -->
+            <div class="mb-3">
+                <label class="form-label">Cédula</label>
+                <input type="text" name="cedula" class="form-control" required>
+            </div>
+            <!-- Teléfono -->
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="telefono" class="form-control" required>
+            </div>
+            <!-- Estado de Membresía -->
+            <div class="mb-3">
+                <label class="form-label">Estado de Membresía</label>
+                <select name="estado_membresia" class="form-select" required>
+                    <option value="ACTIVO">ACTIVO</option>
+                    <option value="INACTIVO">INACTIVO</option>
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="SUSPENDIDO">SUSPENDIDO</option>
+                    <option value="VENCIDO">VENCIDO</option>
+                </select>
+            </div>
+            <!-- Fecha de ingreso -->
+            <div class="mb-3">
+                <label class="form-label">Fecha de Ingreso</label>
+                <input type="date" name="fecha_ingreso" class="form-control" required>
+            </div>
+            <!-- Fecha de vencimiento -->
+            <div class="mb-3">
+                <label class="form-label">Fecha de vencimiento de Membresía</label>
+                <input type="date" name="membresia_vencimiento" class="form-control">
+            </div>
+            <!-- Foto de perfil (opcional) -->
+            <div class="mb-3">
+                <label class="form-label">Foto de Perfil (opcional)</label>
+                <input type="file" name="foto_perfil" class="form-control" accept="image/*">
+            </div>
+            <!-- Botones -->
+            <div class="mt-4">
+                <button class="btn btn-primary" type="submit">Guardar Cliente</button>
+                <a href="{{ url_for('admin.lista_clientes') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
